@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="de" data-tier="standard">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Home · Modul-Konfigurator · Gruppe 7</title>
+<style>
+:root{
+  --ink:#14253A; --ink2:#475568; --muted:#7C8896;
+  --bg:#EBEEF2; --surface:#FFFFFF; --surface2:#F5F7FA;
+  --line:#E1E6EC; --line2:#EDF1F5;
+  --basic:#5C6B7E; --standard:#1F6FB2; --premium:#B08227;
+  --sec:#C0392B; --ok:#2E8B57; --warn:#B3541E;
+  --tier:var(--standard); --tc:var(--standard);
+  --mono:"SFMono-Regular",ui-monospace,"Cascadia Mono",Consolas,"Courier New",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --r:16px; --r2:12px;
+  --sh1:0 1px 2px rgba(20,37,58,.06),0 2px 8px rgba(20,37,58,.05);
+  --sh2:0 14px 36px rgba(20,37,58,.14);
+}
+html[data-tier="basic"]{--tier:var(--basic)}
+html[data-tier="standard"]{--tier:var(--standard)}
+html[data-tier="premium"]{--tier:var(--premium)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--sans);color:var(--ink);background:var(--bg);line-height:1.5;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  background-image:radial-gradient(circle at 1px 1px,rgba(20,37,58,.05) 1px,transparent 0);
+  background-size:24px 24px;padding:clamp(12px,3vw,34px);transition:padding-bottom .3s}
+body.dock-pad{padding-bottom:96px}
+.wrap{max-width:1160px;margin:0 auto}
+.block{margin-bottom:18px}
+
+/* ---- Kopf ---- */
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:22px;flex-wrap:wrap;margin-bottom:20px}
+.head .eyebrow{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--tier);transition:color .4s}
+.head h1{font-size:clamp(25px,3.4vw,38px);font-weight:800;letter-spacing:-.02em;line-height:1.08;margin-top:8px}
+.head h1 em{font-style:normal;color:var(--tier);transition:color .4s}
+.head .meta{font-size:12.5px;color:var(--ink2);text-align:right;line-height:1.65;max-width:380px}
+.head .meta b{color:var(--ink);font-weight:700}
+
+/* ---- Stufen ---- */
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+.tier{display:flex;flex-direction:column;position:relative;text-align:left;background:var(--surface);
+  border:1.5px solid var(--line);border-radius:var(--r);padding:16px 18px;cursor:pointer;
+  font:inherit;color:var(--ink);box-shadow:var(--sh1);
+  transition:transform .2s,box-shadow .2s,border-color .2s}
+.tier[data-t="basic"]{--tc:var(--basic)} .tier[data-t="standard"]{--tc:var(--standard)} .tier[data-t="premium"]{--tc:var(--premium)}
+.tier:hover{transform:translateY(-3px);box-shadow:var(--sh2)}
+.tier:focus-visible{outline:3px solid var(--tc);outline-offset:3px}
+.tier .tname{display:flex;align-items:center;gap:9px;font-size:17px;font-weight:800;letter-spacing:-.01em}
+.tier .dot{width:13px;height:13px;border-radius:4px;flex:0 0 auto}
+.tier[data-t="basic"] .dot{background:var(--basic)} .tier[data-t="standard"] .dot{background:var(--standard)} .tier[data-t="premium"] .dot{background:var(--premium)}
+.tier .tprice{font-family:var(--mono);font-size:12.5px;font-weight:600;color:var(--ink2);margin-top:9px}
+.tier .tdesc{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.45}
+.tier .badge{position:absolute;top:-11px;right:14px;background:var(--standard);color:#fff;
+  font-size:10.5px;font-weight:700;letter-spacing:.04em;border-radius:999px;padding:4px 11px;box-shadow:var(--sh1)}
+.tier.active{border-color:var(--tc);border-width:2px;box-shadow:0 0 0 4px color-mix(in srgb,var(--tc) 15%,transparent),var(--sh2)}
+.tier.active .tname::after{content:"✓ Gewählt";margin-left:auto;font-family:var(--mono);
+  font-size:10.5px;font-weight:700;letter-spacing:.03em;color:var(--tc)}
+
+/* ---- Karten allgemein ---- */
+.card{background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);box-shadow:var(--sh1);overflow:hidden}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:13px 16px;
+  border-bottom:1px solid var(--line2);font-size:13.5px;font-weight:800;letter-spacing:-.01em}
+.card-h .sub{font-weight:500;font-size:12px;letter-spacing:0;color:var(--muted)}
+
+/* ---- Übersicht: Plan | Sicherheit+Summe ---- */
+.overview{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(322px,1fr);gap:18px;align-items:start}
+.plan .plan-body{padding:12px 14px 14px}
+.plan svg{width:100%;height:auto;display:block;border-radius:9px;background:#F4F6F3}
+.legend{margin-top:11px;padding-top:11px;border-top:1px solid var(--line2);
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px 16px;font-size:12px;color:var(--ink2)}
+.legend .lg{display:flex;align-items:center;gap:7px}
+.legend .sw-cone{width:15px;height:11px;background:var(--sec);opacity:.5;clip-path:polygon(0 0,100% 50%,0 100%)}
+.legend b{color:var(--sec)} .legend .cnt{font-family:var(--mono);font-weight:700;color:var(--tier)}
+.ov-side{display:flex;flex-direction:column;gap:16px}
+
+/* ---- Summe ---- */
+.sum{background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh1)}
+.sum-top{position:relative;background:var(--ink);color:#fff;padding:16px 18px 15px;
+  display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.sum-top::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--tier);transition:background .4s}
+.sum-lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#A9BBD0}
+.sum-big{font-size:clamp(28px,4.2vw,37px);font-weight:800;line-height:1.02;margin-top:5px;font-variant-numeric:tabular-nums}
+.sum-tier{font-family:var(--mono);font-size:11.5px;color:#cfe;align-self:flex-start;white-space:nowrap;
+  border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:3px 11px}
+.sum-grid{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--line2)}
+.sum-grid>div{padding:11px 14px;border-right:1px solid var(--line2)}
+.sum-grid>div:last-child{border-right:0}
+.sum-grid .k{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.sum-grid b{font-size:15px;font-weight:700;color:var(--tier);font-variant-numeric:tabular-nums;transition:color .4s}
+.sum-save{padding:13px 14px}
+.save-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px}
+.save-head .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.save-head b{font-size:14px;font-weight:700;color:var(--tier);transition:color .4s}
+.bar{position:relative;height:14px;border-radius:8px;background:var(--surface2);border:1px solid var(--line)}
+.bar .fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:8px;background:var(--tier);
+  transition:width .8s cubic-bezier(.2,.8,.2,1),background .4s}
+.bar .goal{position:absolute;top:-5px;bottom:-5px;left:33.3%;width:2px;background:var(--ink)}
+.bar .goal span{position:absolute;top:-15px;left:5px;font-family:var(--mono);font-size:9px;white-space:nowrap;color:var(--ink2)}
+
+/* ---- Sicherheit ---- */
+.sec{border-color:color-mix(in srgb,var(--sec) 32%,var(--line))}
+.sec .card-h{color:var(--sec);background:color-mix(in srgb,var(--sec) 7%,#fff);border-bottom-color:color-mix(in srgb,var(--sec) 18%,var(--line))}
+.sec-body{padding:12px 16px 14px;font-size:13px;color:var(--ink2);line-height:1.55}
+.sec-body b{color:var(--ink)}
+.sec-meter{display:flex;align-items:center;gap:11px;margin:13px 0 4px;font-size:12px;color:var(--ink2)}
+.sec-bar{flex:1;height:11px;border-radius:6px;overflow:hidden;background:color-mix(in srgb,var(--sec) 11%,#fff);border:1px solid color-mix(in srgb,var(--sec) 22%,var(--line))}
+.sec-bar i{display:block;height:100%;width:0;background:var(--sec);transition:width .7s cubic-bezier(.2,.8,.2,1)}
+.sec-score{font-family:var(--mono);font-weight:700;color:var(--sec);font-variant-numeric:tabular-nums}
+.sec-list{list-style:none;margin-top:9px;display:flex;flex-direction:column;gap:7px}
+.sec-list li{position:relative;padding-left:21px;font-size:12.5px;color:var(--ink2);line-height:1.4}
+.sec-list li::before{content:"✓";position:absolute;left:0;top:0;color:var(--sec);font-weight:800}
+.sec-list li.none{padding-left:0;color:var(--muted)} .sec-list li.none::before{content:""}
+
+/* ---- Basis-Paket (mehrspaltig) ---- */
+.blist{list-style:none;padding:12px 18px 16px;columns:2;column-gap:32px}
+.blist li{position:relative;padding:5px 0 5px 23px;font-size:13px;color:var(--ink2);line-height:1.45;break-inside:avoid;-webkit-column-break-inside:avoid}
+.blist li::before{content:"";position:absolute;left:3px;top:10px;width:7px;height:7px;border-radius:2px;background:var(--tier);transition:background .4s}
+.blist li.head{font-weight:700;color:var(--tier)}
+.blist li.head::before{width:9px;height:9px;border-radius:50%}
+
+/* ---- Module: Karten-Raster nach Kategorie ---- */
+.mod-wrap{padding:6px 16px 18px}
+.mod-cat{margin-top:16px}
+.mod-cat:first-child{margin-top:8px}
+.mod-cat-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 2px 11px;
+  font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink2)}
+.mod-cat-h .gc{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--tier);letter-spacing:0;text-transform:none;transition:color .4s}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(256px,1fr));gap:11px}
+.mcard{position:relative;display:flex;flex-direction:column;gap:7px;background:var(--surface);
+  border:1.5px solid var(--line);border-radius:13px;padding:13px 14px;cursor:pointer;
+  transition:transform .18s,box-shadow .18s,border-color .18s,background .18s}
+.mcard:hover{transform:translateY(-2px);box-shadow:var(--sh2);border-color:color-mix(in srgb,var(--tier) 30%,var(--line))}
+.mcard:focus-visible{outline:3px solid var(--tier);outline-offset:2px}
+.mcard.on{border-color:var(--tier);background:color-mix(in srgb,var(--tier) 6%,#fff)}
+.mcard.fixed{cursor:default;border-color:color-mix(in srgb,var(--ok) 38%,var(--line));background:color-mix(in srgb,var(--ok) 6%,#fff)}
+.mcard-top{display:flex;align-items:center;gap:10px}
+.mcard-ic{width:36px;height:36px;flex:0 0 auto;border-radius:9px;border:1px solid var(--line);
+  background:var(--surface2);display:grid;place-items:center;color:var(--ink);transition:.18s}
+.mcard-ic svg{width:20px;height:20px}
+.mcard.on .mcard-ic{color:var(--tier);border-color:color-mix(in srgb,var(--tier) 30%,var(--line));background:color-mix(in srgb,var(--tier) 10%,#fff)}
+.mcard.fixed .mcard-ic{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 30%,var(--line));background:color-mix(in srgb,var(--ok) 10%,#fff)}
+.sw{width:42px;height:24px;border-radius:999px;background:var(--line);position:relative;flex:0 0 auto;margin-left:auto;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.28);transition:left .2s}
+.mcard.on .sw{background:var(--tier)} .mcard.on .sw::after{left:21px}
+.mcard.fixed .sw{background:var(--ok)} .mcard.fixed .sw::after{left:21px}
+.mcard-nm{font-size:13.5px;font-weight:700;line-height:1.25;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.mcard-ds{font-size:12px;color:var(--muted);line-height:1.4}
+.mcard-note{font-size:11.5px;color:var(--premium);line-height:1.35}
+.mcard-foot{margin-top:auto;padding-top:3px}
+.mcard-price{font-family:var(--mono);font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.mcard-price.incl{color:var(--ok)}
+.mcard-price small{font-weight:500;font-size:10.5px;color:var(--muted);margin-left:5px}
+.tag{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.02em;padding:1px 7px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+.tag.sec{color:var(--sec)} .tag.incl{color:var(--ok)}
+
+.hint{font-size:12px;color:var(--muted);line-height:1.55;margin:14px 2px 0}
+
+/* ---- Plankopf-Footer ---- */
+.foot{margin-top:22px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.foot>div{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:12px 15px;font-size:12.5px;color:var(--ink2);line-height:1.55;box-shadow:var(--sh1)}
+.foot .pl{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.foot .pl+.pl{margin-top:7px}
+.foot b{color:var(--ink);font-weight:700}
+
+/* ---- Sticky Dock (Preis immer sichtbar) ---- */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:60;padding:0 clamp(12px,3vw,34px);
+  transform:translateY(130%);transition:transform .35s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+.dock.show{transform:translateY(0);pointer-events:auto}
+.dock-in{max-width:1160px;margin:0 auto;background:var(--ink);color:#fff;border-radius:14px 14px 0 0;
+  border-top:3px solid var(--tier);box-shadow:0 -10px 30px rgba(20,37,58,.24);
+  display:flex;align-items:center;gap:18px;padding:11px 20px;flex-wrap:wrap}
+.dock-tier{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;white-space:nowrap}
+.dock-tier .dot{width:11px;height:11px;border-radius:3px;background:var(--tier);transition:background .4s}
+.dock-total{display:flex;flex-direction:column;line-height:1.05;margin-right:auto}
+.dock-total .dl{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#A9BBD0}
+.dock-total b{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px}
+.dock-metrics{display:flex;gap:18px;flex-wrap:wrap}
+.dock-metrics span{display:flex;flex-direction:column;line-height:1.1}
+.dock-metrics i{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#A9BBD0;font-style:normal}
+.dock-metrics b{font-size:13px;font-weight:700;margin-top:3px;font-variant-numeric:tabular-nums}
+.dock-metrics .sc{color:#FFC9C2}
+
+/* ---- SVG ---- */
+.dev{opacity:0;transform:scale(.4);transform-origin:center;transform-box:fill-box;
+  transition:opacity .3s,transform .35s cubic-bezier(.34,1.56,.64,1)}
+.dev.on{opacity:1;transform:scale(1)}
+.cone{opacity:0;transition:opacity .5s} .cone.on{opacity:.48}
+
+@media (max-width:980px){ .overview{grid-template-columns:1fr} }
+@media (max-width:680px){ .tiers{grid-template-columns:1fr} .blist{columns:1} .foot{grid-template-columns:1fr 1fr} .head .meta{text-align:left} .dock-metrics span:nth-child(n+3){display:none} }
+@media (max-width:440px){ .foot{grid-template-columns:1fr} .dock-metrics{display:none} }
+@media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important;scroll-behavior:auto!important} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="head">
+  <div>
+    <div class="eyebrow">Projekt Smart Home · Gruppe 7 · Modularer Konfigurator</div>
+    <h1>Basis <em id="hTier">Standard</em> + frei wählbare Module</h1>
+  </div>
+  <div class="meta">
+    <b>HRW · Campus Bottrop</b> · Projektmanagement SoSe 2026<br>
+    EFH · ca. 180 m² · 2 Etagen + Keller · 6 SZ · 2 Bäder · 3 WC<br>
+    Garten 400 m² + Vorgarten · Balkon OG · Garage (3 Zugänge)<br>
+    Auftraggeberin: Prof. Dr.-Ing. M. W. Asmah
+  </div>
+</header>
+
+<nav class="tiers" role="tablist" aria-label="Basis-Stufe">
+  <button class="tier" data-t="basic" role="tab" aria-selected="false">
+    <span class="tname"><span class="dot"></span>Basic</span>
+    <span class="tprice" id="pBasic"></span>
+    <span class="tdesc">Funk-Retrofit, Schlüsselräume. Günstigster Einstieg, alles Weitere als Modul.</span>
+  </button>
+  <button class="tier active" data-t="standard" role="tab" aria-selected="true">
+    <span class="badge">Empfehlung</span>
+    <span class="tname"><span class="dot"></span>Standard</span>
+    <span class="tprice" id="pStandard"></span>
+    <span class="tdesc">Marken-Funk, ganzes Haus, Sicherheit &amp; Rollläden bereits im Paket.</span>
+  </button>
+  <button class="tier" data-t="premium" role="tab" aria-selected="false">
+    <span class="tname"><span class="dot"></span>Premium</span>
+    <span class="tprice" id="pPremium"></span>
+    <span class="tdesc">KNX verkabelt, maximale Sicherheit &amp; Privatsphäre, PV-/E-Auto-ready.</span>
+  </button>
+</nav>
+
+<section class="overview block">
+  <figure class="plan card">
+    <div class="card-h"><span>Grundstück &amp; Hausschnitt</span><span class="sub">unmaßstäblich · Live-Geräte</span></div>
+    <div class="plan-body">
+      <svg id="svg" viewBox="0 0 820 600" role="img" aria-label="Grundstück & Hausschnitt mit Geräten, Garage, Garten, Vorgarten und Kamera-Sichtfeldern"></svg>
+      <figcaption class="legend">
+        <span class="lg"><span class="sw-cone"></span> <b>Rote Kegel</b> = Kamera-Sichtfeld</span>
+        <span class="lg">Grundstück + Haus · KG / EG / OG</span>
+        <span class="lg"><span class="cnt" id="capCount"></span></span>
+      </figcaption>
+    </div>
+  </figure>
+
+  <div class="ov-side">
+    <div class="sum">
+      <div class="sum-top">
+        <div><span class="sum-lbl">Gesamtkosten · Vollkosten</span><div class="sum-big" id="sTotal">0 €</div></div>
+        <span class="sum-tier" id="sTierChip">Standard</span>
+      </div>
+      <div class="sum-grid">
+        <div><span class="k">Hardware</span><b id="sHw">0 €</b></div>
+        <div><span class="k">Personal/Dienstl.</span><b id="sPers">0 €</b></div>
+        <div><span class="k">Dauer</span><b id="sDauer">—</b></div>
+      </div>
+      <div class="sum-save">
+        <div class="save-head"><span class="k">Energieeinsparung (Ziel)</span><b id="sSave">—</b></div>
+        <div class="bar"><div class="fill" id="saveFill"></div><div class="goal"><span>Ziel 10 %</span></div></div>
+      </div>
+    </div>
+
+    <div class="card sec">
+      <div class="card-h"><span>🛡 Sicherheit &amp; Privatsphäre</span><span class="sub">Schwerpunkt</span></div>
+      <div class="sec-body">
+        <span id="secTxt"></span>
+        <div class="sec-meter">Abdeckung Außen/Perimeter <div class="sec-bar"><i id="secBar"></i></div> <span class="sec-score" id="secScore"></span></div>
+        <ul class="sec-list" id="secList"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="card block">
+  <div class="card-h"><span>Basis-Paket <span id="bTierName">Standard</span></span><span class="sub">fest enthalten · nicht abwählbar</span></div>
+  <ul class="blist" id="bList"></ul>
+</section>
+
+<section class="card block">
+  <div class="card-h"><span>Module — frei zuschaltbar</span><span class="sub">🛡 = Sicherheit · Aufpreis live</span></div>
+  <div class="mod-wrap" id="modList"></div>
+</section>
+
+<p class="hint" id="hint"></p>
+
+<footer class="foot">
+  <div><span class="pl">Projekt</span><b>Smart Home – Modul-Konfigurator</b><br>Konzept &amp; Planung, keine Umsetzung</div>
+  <div><span class="pl">Gruppe 7</span>Al-Toki · Salehi · Garcia Gomes<br>Rhanimi · Kulahin</div>
+  <div><span class="pl">Projektleitung</span>R. Garcia Gomes<br><span class="pl">Stundensätze</span>70 / 70 / 95 €/h</div>
+  <div><span class="pl">Datum / Stand</span><b>12.06.2026</b><br><span class="pl">Preise</span>marktüblich DE 06/2026</div>
+</footer>
+
+</div>
+
+<div class="dock" id="dock" aria-hidden="true">
+  <div class="dock-in">
+    <span class="dock-tier"><span class="dot"></span><span id="dockTier">Basis Standard</span></span>
+    <span class="dock-total"><span class="dl">Gesamtkosten</span><b id="dockTotal">0 €</b></span>
+    <span class="dock-metrics">
+      <span><i>Hardware</i><b id="dockHw">—</b></span>
+      <span><i>Personal</i><b id="dockPers">—</b></span>
+      <span><i>Dauer</i><b id="dockDauer">—</b></span>
+      <span><i>Sicherheit</i><b class="sc" id="dockSec">—</b></span>
+    </span>
+  </div>
+</div>
+
+<script type="text/template" id="svgsrc"><defs>
+<pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke="#9AA6B2" stroke-width="1.3"/></pattern>
+<g id="i-bulb"><circle cx="0" cy="0" r="5.5" fill="#FFF3C2" stroke="#16324F" stroke-width="1.4"/><path d="M-2.6 5.5H2.6M-1.8 8H1.8" stroke="#16324F" stroke-width="1.3"/></g>
+<g id="i-thermo"><rect x="-6" y="-5.5" width="12" height="11" rx="2.5" fill="#fff" stroke="#16324F" stroke-width="1.4"/><circle cx="0" cy="0" r="3" fill="none" stroke="#16324F" stroke-width="1.1"/></g>
+<g id="i-cam"><rect x="-7" y="-4.5" width="10" height="8" rx="2" fill="#fff" stroke="#16324F" stroke-width="1.4"/><path d="M3 -2.5L8 -5V5L3 2Z" fill="#fff" stroke="#16324F" stroke-width="1.3"/><circle cx="-2.5" cy="-.5" r="1.4" fill="#16324F"/></g>
+<g id="i-lock"><rect x="-5" y="-1.6" width="10" height="8" rx="1.4" fill="#fff" stroke="#16324F" stroke-width="1.4"/><path d="M-2.6 -1.6V-4.6a2.6 2.6 0 0 1 5.2 0V-1.6" fill="none" stroke="#16324F" stroke-width="1.3"/></g>
+<g id="i-bell"><rect x="-4" y="-7" width="8" height="14" rx="2.5" fill="#fff" stroke="#16324F" stroke-width="1.4"/><circle cx="0" cy="-2.5" r="1.8" fill="none" stroke="#16324F" stroke-width="1.1"/><circle cx="0" cy="3.5" r="1.1" fill="#1F6FB2"/></g>
+<g id="i-sensor"><rect x="-5" y="-2.6" width="6" height="5.2" rx="1" fill="#fff" stroke="#16324F" stroke-width="1.2"/><rect x="1.6" y="-2.6" width="3.4" height="5.2" rx="1" fill="#16324F"/></g>
+<g id="i-siren"><path d="M-5.5 4.5H5.5L3 -4.5H-3Z" fill="#fff" stroke="#16324F" stroke-width="1.4"/><path d="M0 -7V-5.5M5 -6L3.8 -4.8M-5 -6L-3.8 -4.8" stroke="#B3541E" stroke-width="1.2"/></g>
+<g id="i-smoke"><circle cx="0" cy="0" r="5.5" fill="#fff" stroke="#16324F" stroke-width="1.4"/><circle cx="-1.8" cy="0" r=".8" fill="#16324F"/><circle cx="1.8" cy="0" r=".8" fill="#16324F"/><circle cx="0" cy="2" r=".8" fill="#16324F"/></g>
+<g id="i-hub"><rect x="-7" y="-7" width="14" height="14" rx="4" fill="#1F4E79"/><circle cx="0" cy="0" r="1.8" fill="#fff"/><circle cx="0" cy="0" r="4.2" fill="none" stroke="#fff" stroke-width="1" opacity=".7"/></g>
+<g id="i-tablet"><rect x="-6" y="-4.5" width="12" height="9" rx="1.4" fill="#fff" stroke="#16324F" stroke-width="1.3"/><rect x="-4.2" y="-2.8" width="8.4" height="5" fill="#CFE3F4"/></g>
+<g id="i-speaker"><rect x="-4.5" y="-6.5" width="9" height="13" rx="2" fill="#fff" stroke="#16324F" stroke-width="1.3"/><circle cx="0" cy="1.6" r="2.4" fill="none" stroke="#16324F" stroke-width="1.1"/><circle cx="0" cy="-3.2" r="1" fill="#16324F"/></g>
+<g id="i-tv"><rect x="-9" y="-6" width="18" height="11" rx="1.4" fill="#fff" stroke="#16324F" stroke-width="1.3"/><rect x="-7" y="-4.4" width="14" height="7" fill="#16324F"/></g>
+<g id="i-proj"><rect x="-7" y="-3.5" width="12" height="7" rx="2" fill="#fff" stroke="#16324F" stroke-width="1.3"/><circle cx="2.5" cy="0" r="1.8" fill="none" stroke="#16324F" stroke-width="1.1"/></g>
+<g id="i-mower"><rect x="-8" y="-4.5" width="16" height="7" rx="3.5" fill="#fff" stroke="#16324F" stroke-width="1.3"/><circle cx="-4.5" cy="3.5" r="2.1" fill="#16324F"/><circle cx="4.5" cy="3.5" r="2.1" fill="#16324F"/></g>
+<g id="i-sprink"><line x1="0" y1="5" x2="0" y2="-3" stroke="#16324F" stroke-width="1.5"/><path d="M-7 -3.5Q0 -11 7 -3.5" fill="none" stroke="#1F6FB2" stroke-width="1.2" stroke-dasharray="2.5 2"/></g>
+<g id="i-roll"><rect x="-11" y="-3.5" width="22" height="7" fill="#fff" stroke="#16324F" stroke-width="1.2"/><line x1="-11" y1="-1.2" x2="11" y2="-1.2" stroke="#16324F" stroke-width=".7"/><line x1="-11" y1="1.2" x2="11" y2="1.2" stroke="#16324F" stroke-width=".7"/></g>
+<g id="i-glight"><line x1="0" y1="6" x2="0" y2="-3" stroke="#16324F" stroke-width="1.5"/><circle cx="0" cy="-6" r="3" fill="#FFF3C2" stroke="#16324F" stroke-width="1.2"/></g>
+<g id="i-motion"><path d="M-5 4.5H5L3.5 -4.5H-3.5Z" fill="#fff" stroke="#16324F" stroke-width="1.2"/><path d="M-6 -6Q0 -11 6 -6" fill="none" stroke="#9B2D30" stroke-width="1.1" stroke-dasharray="2 2"/></g>
+<g id="i-wallbox"><rect x="-5" y="-7" width="10" height="13" rx="2" fill="#fff" stroke="#16324F" stroke-width="1.3"/><path d="M0 -3.5L-2 0H0L-1.2 3.5" fill="none" stroke="#A8842C" stroke-width="1.3"/></g>
+<g id="i-pv"><rect x="-7" y="-5" width="14" height="10" fill="#BFD8EE" stroke="#1F4E79" stroke-width="1.3"/><line x1="-7" y1="-1.6" x2="7" y2="-1.6" stroke="#1F4E79" stroke-width=".8"/><line x1="-2.3" y1="-5" x2="-2.3" y2="5" stroke="#1F4E79" stroke-width=".8"/><line x1="2.3" y1="-5" x2="2.3" y2="5" stroke="#1F4E79" stroke-width=".8"/></g>
+<g id="i-garage"><rect x="-8" y="-6" width="16" height="12" rx="1" fill="#fff" stroke="#16324F" stroke-width="1.4"/><line x1="-8" y1="-2.5" x2="8" y2="-2.5" stroke="#16324F" stroke-width=".8"/><line x1="-8" y1="1" x2="8" y2="1" stroke="#16324F" stroke-width=".8"/></g>
+<g id="i-poller"><rect x="-2" y="-7" width="4" height="14" rx="2" fill="#A8842C" stroke="#16324F" stroke-width="1.2"/><circle cx="0" cy="-4" r="1" fill="#fff"/></g>
+<g id="i-fp"><ellipse cx="0" cy="0" rx="4.5" ry="6" fill="#fff" stroke="#16324F" stroke-width="1.3"/><path d="M-2 0a2 2.5 0 0 1 4 0" fill="none" stroke="#A8842C" stroke-width="1"/></g>
+<g id="i-washer"><rect x="-7" y="-7" width="14" height="14" rx="2" fill="#fff" stroke="#16324F" stroke-width="1.4"/><circle cx="0" cy="1" r="4" fill="none" stroke="#16324F" stroke-width="1.2"/><circle cx="0" cy="1" r="1.6" fill="#CFE3F4"/></g>
+<g id="i-meter"><rect x="-6" y="-5.5" width="12" height="11" rx="2" fill="#fff" stroke="#16324F" stroke-width="1.3"/><path d="M-3.5 2A4 4 0 0 1 3.5 2" fill="none" stroke="#16324F" stroke-width="1.1"/></g>
+<g id="i-nvr"><rect x="-8" y="-4.5" width="16" height="9" rx="1.4" fill="#fff" stroke="#16324F" stroke-width="1.3"/><circle cx="4.5" cy="0" r="1.1" fill="#2E7D52"/></g>
+</defs>
+
+<rect x="14" y="14" width="792" height="572" fill="#EAEFE6" stroke="#16324F" stroke-width="2"/>
+<rect x="14" y="556" width="792" height="30" fill="#D9DCE0"/><line x1="14" y1="556" x2="806" y2="556" stroke="#16324F" stroke-width="1.6"/>
+<text x="380" y="576" text-anchor="middle" font-family="Courier New,monospace" font-size="11" fill="#5A6B7E">STRASSE</text>
+<rect x="14" y="14" width="58" height="572" fill="#E0DCD6"/><line x1="72" y1="14" x2="72" y2="586" stroke="#16324F" stroke-width="1.4" stroke-dasharray="5 4"/>
+<text x="43" y="300" text-anchor="middle" font-family="Courier New,monospace" font-size="10.5" fill="#7E756B" transform="rotate(-90 43 300)">NACHBARGRUNDSTÜCK</text>
+
+<rect x="78" y="476" width="610" height="80" fill="#DCE8D2" opacity=".6"/>
+<text x="88" y="493" font-family="Courier New,monospace" font-size="11" fill="#3E5A3A">VORGARTEN</text>
+<path d="M250 544 v-13 m-5 6 q-4 -7 0 -11 q4 4 0 11" fill="#8FB97C" stroke="#2E7D52" stroke-width="1.2"/>
+<path d="M150 544 v-11 m-4 5 q-3 -6 0 -9 q3 3 0 9" fill="#8FB97C" stroke="#2E7D52" stroke-width="1.2"/>
+
+<g id="house">
+  <rect x="300" y="176" width="330" height="120" fill="#fff" stroke="#16324F" stroke-width="2"/>
+  <rect x="300" y="296" width="330" height="120" fill="#fff" stroke="#16324F" stroke-width="2"/>
+  <rect x="300" y="416" width="330" height="86" fill="#F2F2F2" stroke="#16324F" stroke-width="2"/>
+  <line x1="383" y1="176" x2="383" y2="296" stroke="#9AA6B2" stroke-width="1.2"/>
+  <line x1="465" y1="176" x2="465" y2="296" stroke="#9AA6B2" stroke-width="1.2"/>
+  <line x1="547" y1="176" x2="547" y2="296" stroke="#9AA6B2" stroke-width="1.2"/>
+  <line x1="410" y1="296" x2="410" y2="416" stroke="#9AA6B2" stroke-width="1.2"/>
+  <line x1="520" y1="296" x2="520" y2="416" stroke="#9AA6B2" stroke-width="1.2"/>
+  <line x1="410" y1="416" x2="410" y2="502" stroke="#9AA6B2" stroke-width="1.2"/>
+  <line x1="520" y1="416" x2="520" y2="502" stroke="#9AA6B2" stroke-width="1.2"/>
+</g>
+<path d="M286 176 L465 110 L644 176" fill="none" stroke="#16324F" stroke-width="2.4"/>
+<g id="pvSolid" class="dev" data-t=""><use href="#i-pv" x="358" y="150" transform="rotate(-20 358 150)"/><use href="#i-pv" x="400" y="135" transform="rotate(-20 400 135)"/><text x="296" y="130" font-family="Courier New,monospace" font-size="10" fill="#1F4E79">PV (Modul)</text></g>
+
+<g font-family="Courier New,monospace" font-size="11" fill="#5A6B7E">
+  <text x="310" y="194" font-weight="bold" font-size="13" fill="#16324F">OG</text>
+  <text x="310" y="314" font-weight="bold" font-size="13" fill="#16324F">EG</text>
+  <text x="310" y="434" font-weight="bold" font-size="13" fill="#16324F">KG</text>
+  <text x="322" y="250" font-size="10.5">SCHLAF</text><text x="404" y="250" font-size="10.5">SCHLAF</text><text x="486" y="250" font-size="10.5">SCHLAF</text><text x="564" y="250" font-size="10.5">BAD/WC</text>
+  <text x="322" y="288" font-size="9.5">+ 3 weitere SZ · 2. Bad · WC</text>
+  <text x="324" y="370" font-size="11">WOHNEN</text><text x="426" y="370" font-size="11">KÜCHE</text><text x="532" y="370" font-size="10">DIELE/WC</text>
+  <text x="324" y="464" font-size="10.5">TECHNIK</text><text x="428" y="464" font-size="10.5">WASCHEN</text><text x="534" y="464" font-size="10.5">LAGER</text>
+</g>
+<rect x="630" y="206" width="32" height="44" fill="#EAEFE6" stroke="#16324F" stroke-width="1.6"/>
+<line x1="662" y1="206" x2="662" y2="250" stroke="#16324F" stroke-width="2"/>
+<text x="646" y="262" text-anchor="middle" font-family="Courier New,monospace" font-size="9.5" fill="#5A6B7E">BALKON OG</text>
+<rect x="616" y="386" width="14" height="30" fill="#fff" stroke="#16324F" stroke-width="1.6"/>
+
+<rect x="668" y="408" width="124" height="96" fill="#F2F2F2" stroke="#16324F" stroke-width="2"/>
+<text x="676" y="425" font-family="Courier New,monospace" font-size="11" fill="#5A6B7E">GARAGE</text>
+<line x1="792" y1="408" x2="792" y2="504" stroke="#9B2D30" stroke-width="2" stroke-dasharray="4 3"/>
+<text x="802" y="460" font-family="Courier New,monospace" font-size="9" fill="#9B2D30" transform="rotate(90 802 460)">NACHBAR-GARAGE</text>
+<rect x="700" y="498" width="34" height="6" fill="#fff" stroke="#16324F" stroke-width="1.4"/><text x="717" y="519" text-anchor="middle" font-family="Courier New,monospace" font-size="9" fill="#5A6B7E">→Straße</text>
+<rect x="664" y="438" width="8" height="26" fill="#fff" stroke="#16324F" stroke-width="1.4"/><text x="646" y="482" font-family="Courier New,monospace" font-size="9" fill="#5A6B7E">→Haus</text>
+<rect x="700" y="406" width="34" height="6" fill="#fff" stroke="#16324F" stroke-width="1.4"/><text x="717" y="399" text-anchor="middle" font-family="Courier New,monospace" font-size="9" fill="#5A6B7E">→Garten</text>
+
+<rect x="300" y="40" width="492" height="66" fill="#CFE3BE" opacity=".55"/>
+<text x="312" y="59" font-family="Courier New,monospace" font-size="11.5" fill="#3E5A3A" font-weight="bold">GARTEN · 400 m²</text>
+<path d="M690 96 v-20 m-7 10 q-7 -3 -9 -10 q8 1 9 6 q1 -9 11 -11 q-1 10 -11 13" fill="#8FB97C" stroke="#2E7D52" stroke-width="1.2"/>
+
+<rect x="740" y="504" width="52" height="52" fill="#D2D5D9" opacity=".7"/>
+<text x="766" y="534" text-anchor="middle" font-family="Courier New,monospace" font-size="9" fill="#5A6B7E" transform="rotate(90 766 534)">ZUFAHRT</text>
+
+<g id="cones">
+  <path id="cone_base" class="cone" d="M622 388 L676 412 L688 460 Z" fill="#9B2D30"/>
+  <path id="cone_g1" class="cone" d="M316 178 L470 116 L316 110 Z" fill="#9B2D30"/>
+  <path id="cone_g2" class="cone" d="M620 178 L470 116 L640 110 Z" fill="#9B2D30"/>
+  <path id="cone_g3" class="cone" d="M86 180 L240 130 L240 250 Z" fill="#9B2D30"/>
+  <path id="cone_v1" class="cone" d="M300 480 L150 548 L320 550 Z" fill="#9B2D30"/>
+  <path id="cone_ga" class="cone" d="M700 476 L742 555 L700 504 Z" fill="#9B2D30"/>
+</g>
+
+<g id="devs">
+  <use href="#i-hub" x="500" y="396" class="dev" data-t="b s p"/>
+  <use href="#i-bulb" x="345" y="358" class="dev" data-t="b s p"/><use href="#i-bulb" x="448" y="358" class="dev" data-t="b s p"/><use href="#i-bulb" x="552" y="358" class="dev" data-t="b s p"/>
+  <use href="#i-thermo" x="392" y="392" class="dev" data-t="b s p"/><use href="#i-thermo" x="345" y="270" class="dev" data-t="b s p"/>
+  <use href="#i-smoke" x="556" y="392" class="dev" data-t="b s p"/><use href="#i-smoke" x="556" y="270" class="dev" data-t="b s p"/><use href="#i-smoke" x="392" y="460" class="dev" data-t="b s p"/>
+  <use href="#i-cam" x="634" y="388" class="dev" data-t="b s p"/>
+  <use href="#i-cam" x="600" y="392" class="dev" data-t="b s p"/>
+  <use href="#i-bell" x="610" y="390" class="dev" data-t="b s p"/>
+  <use href="#i-sensor" x="620" y="384" class="dev" data-t="b s p"/>
+  <use href="#i-siren" x="470" y="392" class="dev" data-t="b s p"/>
+  <use href="#i-tablet" x="470" y="396" class="dev" data-t="s p"/>
+  <use href="#i-washer" x="448" y="458" class="dev" data-t="b s p"/>
+  <use href="#i-meter" x="345" y="458" class="dev" data-t="s p"/>
+  <use href="#i-nvr" x="552" y="460" class="dev" data-m="cam_garten"/>
+
+  <use href="#i-bulb" x="345" y="232" class="dev" data-m="licht_alle"/><use href="#i-bulb" x="427" y="232" class="dev" data-m="licht_alle"/><use href="#i-bulb" x="509" y="232" class="dev" data-m="licht_alle"/><use href="#i-bulb" x="591" y="232" class="dev" data-m="licht_alle"/>
+  <use href="#i-bulb" x="448" y="392" class="dev" data-m="licht_alle"/>
+  <use href="#i-thermo" x="427" y="270" class="dev" data-m="hzg_einzel"/><use href="#i-thermo" x="509" y="270" class="dev" data-m="hzg_einzel"/><use href="#i-thermo" x="591" y="270" class="dev" data-m="hzg_einzel"/>
+  <use href="#i-roll" x="345" y="384" class="dev" data-m="rollladen"/><use href="#i-roll" x="455" y="384" class="dev" data-m="rollladen"/>
+  <use href="#i-lock" x="623" y="398" class="dev" data-m="locks"/>
+  <use href="#i-fp" x="610" y="372" class="dev" data-m="locks_fp"/>
+  <use href="#i-siren" x="650" y="150" class="dev" data-m="alarm"/>
+  <use href="#i-cam" x="316" y="178" class="dev" data-m="cam_garten"/><use href="#i-cam" x="620" y="178" class="dev" data-m="cam_garten"/><use href="#i-cam" x="88" y="180" class="dev" data-m="cam_garten"/>
+  <use href="#i-cam" x="300" y="476" class="dev" data-m="vorgarten_cam"/>
+  <use href="#i-garage" x="730" y="452" class="dev" data-m="garage"/><use href="#i-cam" x="700" y="474" class="dev" data-m="garage"/>
+  <use href="#i-poller" x="752" y="524" class="dev" data-m="poller"/><use href="#i-poller" x="772" y="524" class="dev" data-m="poller"/>
+  <use href="#i-sprink" x="500" y="96" class="dev" data-m="bewaesser"/><use href="#i-sprink" x="570" y="96" class="dev" data-m="bewaesser"/><use href="#i-sprink" x="200" y="540" class="dev" data-m="bewaesser_vg"/>
+  <use href="#i-wallbox" x="760" y="438" class="dev" data-m="wallbox"/>
+  <use href="#i-speaker" x="358" y="392" class="dev" data-m="multiroom"/><use href="#i-speaker" x="427" y="392" class="dev" data-m="multiroom"/>
+  <use href="#i-proj" x="375" y="358" class="dev" data-m="heimkino"/>
+  <use href="#i-tv" x="345" y="392" class="dev" data-m="tv"/>
+  <use href="#i-glight" x="646" y="222" class="dev" data-m="balkon"/>
+  <use href="#i-mower" x="430" y="94" class="dev" data-t="s p"/>
+  <use href="#i-motion" x="509" y="392" class="dev" data-m="praesenz"/>
+</g>
+</script>
+<script>// ============ DATEN: Smart-Home modularer Konfigurator · Gruppe 7 ============
+// Haus: 6 SZ, Wohnzimmer, Küche, 2 Bäder, 3 WC, Balkon (1.OG), Garten+Vorgarten,
+// Garage (3 Zugänge, Nachbar angrenzend). EG: el. Rollläden. Keine FBH → Heizkörper.
+// Gesamte Technik NEU (Altanlage wird komplett demontiert/entsorgt). Saugroboter vorhanden.
+
+window.CFG = {
+  raeume: { schlaf:6, wohn:1, kueche:1, bad:2, wc:3 },
+  stundensaetze: { plan:70, elektro:70, knx:95 },
+
+  // ---- BASIS-PAKETE (Festumfang je Stufe, nicht abwählbar) ----
+  basis: {
+    basic: {
+      label:"Basic", farbe:"var(--basic)",
+      tech:"Funk-Retrofit (Zigbee / Wi-Fi / DECT) · Samsung SmartThings",
+      install:"Fachmontage (leicht)",
+      enthalten:[
+        "SmartThings Station als Zentrale (Matter/Zigbee)",
+        "Smarte Leuchtmittel in Wohnzimmer, Küche & Fluren (WiZ/Tradfri)",
+        "Heizkörperthermostate an allen Heizkörpern (AVM/Eqiva) — Einzelraumabsenkung",
+        "Basis-Sicherheit: 2 Kameras (1 außen Eingang / 1 innen), Video-Türklingel, Tür-/Fenstersensoren an EG-Zugängen, Innensirene",
+        "Vernetzte Rauchmelder auf allen Ebenen (KG/EG/OG)",
+        "Steuerung per SmartThings-App + 1 Sprachassistent",
+        "Demontage & Entsorgung der kompletten Altanlage",
+        "Einbindung des vorhandenen Saugroboters",
+      ],
+      hw:2615, // вкл. demontage-материал
+      persFix:[ // часы базового пакета
+        ["Planung & Konzeption","18 h × 70 €",1260],
+        ["Demontage & Entsorgung Altanlage","6 h × 70 €",420],
+        ["Beschaffung & Logistik","5 h × 70 €",350],
+        ["Montage & Installation","20 h × 70 €",1400],
+        ["Konfiguration, Routinen & Einweisung","10 h × 70 €",700],
+        ["Projektmanagement & Sitzungen","5 h × 70 €",350],
+        ["Anfahrt / Nebenkosten (pauschal)","",150],
+      ],
+      dauerWo:2.5,
+      save:10,
+    },
+    standard: {
+      label:"Standard", farbe:"var(--standard)",
+      tech:"Marken-Funksysteme (Hue, tado°, Ajax) unter SmartThings / Matter",
+      install:"Fachbetrieb (Elektro, Montage, Programmierung)",
+      enthalten:[
+        "Alles aus Basic, plus:",
+        "Philips Hue in allen Wohn-/Schlafräumen (6 SZ + Wohnzimmer)",
+        "tado° Einzelraumregelung an allen Heizkörpern (statt einfacher Thermostate)",
+        "Ajax-Alarmanlage (Zentrale, Melder, Außensirene)",
+        "4 Kameras (2 innen / 2 außen) mit lokaler Speicherung (NVR/NAS)",
+        "2 Smart Locks (Haus- & Gartentür)",
+        "Steuerung der el. Rollläden im EG + Wand-Tablet",
+        "Zentrales Energiemonitoring (Shelly Pro 3EM)",
+        "Vernetzte Rauch-/CO-/Wassermelder auf allen Ebenen (KG/EG/OG)",
+      ],
+      hw:7954,
+      persFix:[
+        ["Planung & Konzeption","28 h × 70 €",1960],
+        ["Demontage & Entsorgung Altanlage","5 h × 70 €",350],
+        ["Beschaffung & Logistik","7 h × 70 €",490],
+        ["Elektroinstallation Fachbetrieb (Rollläden EG, Außen)","18 h × 70 €",1260],
+        ["Montage & Inbetriebnahme","26 h × 70 €",1820],
+        ["Programmierung, Szenen & Einweisung","12 h × 70 €",840],
+        ["Projektmanagement & Sitzungen","8 h × 70 €",560],
+        ["Anfahrt / Nebenkosten (pauschal)","",180],
+      ],
+      dauerWo:4.5,
+      save:18,
+    },
+    premium: {
+      label:"Premium", farbe:"var(--premium)",
+      tech:"KNX-Bus (kabelgebunden) + DALI · SmartThings als Bedien-Layer",
+      install:"KNX-Systemintegrator (Fachbetrieb)",
+      enthalten:[
+        "Alles aus Standard, plus:",
+        "KNX-Bussystem über beide Etagen + Keller (Aktorik, Sensorik, Glastaster)",
+        "KNX/DALI-Beleuchtung mit Präsenz- & Konstantlichtregelung",
+        "KNX-Visualisierung (Gira X1) + Glastaster je Raum",
+        "Verkabelte Alarmanlage + 6 PoE-Kameras + lokaler NVR",
+        "Zutritt per Fingerprint + Smart Locks",
+        "Vollständig lokale Verarbeitung (kein Cloud-Zwang), VPN-Fernzugriff",
+        "Energiemanagement-System (EMS), PV- & Wallbox-vorbereitet",
+        "Anpassung Unterverteilung / Elektromodernisierung",
+      ],
+      hw:27300,
+      persFix:[
+        ["Fachplanung & Konzeption","45 h × 70 €",3150],
+        ["Demontage, Rückbau & Entsorgung Altanlage","8 h × 70 €",560],
+        ["Ausschreibung, Beschaffung & Bestellwesen","10 h × 70 €",700],
+        ["KNX-Installation (Systemintegrator)","58 h × 95 €",5510],
+        ["KNX-Programmierung & Visualisierung","28 h × 95 €",2660],
+        ["Elektroarbeiten (Bus, Unterverteilung, Dosen)","42 h × 70 €",2940],
+        ["Einweisung & Systemdokumentation","6 h × 95 €",570],
+        ["Projektmanagement, Sitzungen & Baubegleitung","16 h × 70 €",1120],
+        ["Baustelleneinrichtung / Anfahrt (pauschal)","",400],
+      ],
+      dauerWo:13,
+      save:28,
+    },
+  },
+
+  // ---- MODULE: in jeder Stufe verfügbar. inBasis: in welchen Stufen schon enthalten ----
+  // kosten = Vollkosten des Moduls (HW + Montage + Anteil), je Stufe ggf. unterschiedlich
+  module: [
+    { id:"licht_alle", icon:"bulb", name:"Smartes Licht in ALLEN Räumen",
+      desc:"Erweiterung auf alle 6 Schlafzimmer, 2 Bäder, 3 WC inkl. Szenen.",
+      inBasis:["standard","premium"],
+      kosten:{ basic:1350, standard:0, premium:0 }, dauer:0.5 },
+
+    { id:"hzg_einzel", icon:"thermo", name:"Heizung: Einzelraumregelung (tado°/KNX)",
+      desc:"Pro-Raum-Regelung statt einfacher Absenkung; Geofencing, Fenster-offen.",
+      inBasis:["standard","premium"],
+      kosten:{ basic:980, standard:0, premium:0 }, dauer:0.5 },
+
+    { id:"rollladen", icon:"roll", name:"Rollläden-Automatik EG",
+      desc:"Steuerung der elektrischen Rollläden im Erdgeschoss (Zeit, Sonne, Szenen).",
+      inBasis:["standard","premium"],
+      kosten:{ basic:640, standard:0, premium:0 }, dauer:0.5 },
+
+    { id:"alarm", icon:"siren", name:"Vollwertige Alarmanlage (Ajax/KNX)",
+      desc:"Zentrale + Melder + Außensirene, Aufschaltung-ready.",
+      inBasis:["standard","premium"],
+      kosten:{ basic:850, standard:0, premium:0 }, dauer:0.5 },
+
+    { id:"locks", icon:"lock", name:"Smart Locks / elektronische Zutrittskontrolle",
+      desc:"Haus- & Gartentür schlüssellos; Premium zusätzlich Fingerprint.",
+      inBasis:["standard","premium"],
+      kosten:{ basic:520, standard:0, premium:0 }, dauer:0.3 },
+
+    { id:"cam_garten", icon:"cam", name:"Garten-/Perimeter-Kameras (lückenlos)",
+      desc:"Zonenkonzept Garten + Grundstücksgrenze; keine unbemerkte Annäherung vom Nachbargrundstück. DSGVO-Masking der Fremdflächen.",
+      inBasis:[],
+      kosten:{ basic:1180, standard:980, premium:1260 }, dauer:0.5, security:true },
+
+    { id:"vorgarten_cam", icon:"cam", name:"Vorgarten- & Straßenseiten-Überwachung",
+      desc:"Abdeckung Zuwege von der Straße; Erkennung beim Betreten des Vorgartens.",
+      inBasis:[],
+      kosten:{ basic:620, standard:560, premium:680 }, dauer:0.3, security:true },
+
+    { id:"garage", icon:"garage", name:"Garagen-Tor & 3-Zugang-Sicherung",
+      desc:"Torsteuerung + Sensorik aller 3 Zugänge (Straße/Garten/Haus); Nachbar-Grenze berücksichtigt.",
+      inBasis:[],
+      kosten:{ basic:780, standard:720, premium:900 }, dauer:0.4, security:true },
+
+    { id:"poller", icon:"poller", name:"Versenkbare Poller / Zufahrtssperre",
+      desc:"Physische Sperre der Einfahrt gegen unbefugtes Betreten/Befahren (elektrisch, Funk/App).",
+      inBasis:[],
+      kosten:{ basic:4200, standard:4200, premium:4600 }, dauer:1.5, security:true },
+
+    { id:"bewaesser", icon:"sprink", name:"Gartenbewässerung (Garten + Vorgarten)",
+      desc:"Automatik nach Bodenfeuchte & Schlafzeit-Fenster; Vorgarten optional mit abgedeckt.",
+      inBasis:[],
+      kosten:{ basic:680, standard:620, premium:900 }, dauer:0.5 },
+
+    { id:"wallbox", icon:"wallbox", name:"E-Auto-Ladung / Wallbox 11 kW",
+      desc:"Vollwertige Wallbox inkl. FI, Kabel & Elektriker; Premium mit EMS-/PV-Steuerung.",
+      inBasis:[],
+      kosten:{ basic:1800, standard:1800, premium:1400 }, dauer:0.5,
+      note:{ premium:"in Premium günstiger: EMS/Unterverteilung bereits vorhanden" } },
+
+    { id:"pv", icon:"pv", name:"PV-Anbindung & Energiemanagement",
+      desc:"Einbindung der geplanten Photovoltaik, Eigenverbrauchsoptimierung.",
+      inBasis:["premium"],
+      kosten:{ basic:1600, standard:1400, premium:0 }, dauer:0.5 },
+
+    { id:"multiroom", icon:"speaker", name:"Multiroom-Audio",
+      desc:"Synchrone Beschallung mehrerer Zonen (Wohnen, Küche, Bad …).",
+      inBasis:[],
+      kosten:{ basic:780, standard:700, premium:900 }, dauer:0.3 },
+
+    { id:"heimkino", icon:"proj", name:"Heimkino / Projektor-Szene",
+      desc:"Projektor + Kino-Szene (Licht + Beschattung + Audio). Inkl. Vergleich TV vs. Projektor.",
+      inBasis:[],
+      kosten:{ basic:1500, standard:1400, premium:1300 }, dauer:0.4 },
+
+    { id:"tv", icon:"tv", name:"Samsung-TV & Geräte-Einbindung",
+      desc:"Vorhandene Samsung-Geräte (TV, Waschmaschine) in Routinen/SmartThings.",
+      inBasis:["standard","premium"],
+      kosten:{ basic:180, standard:0, premium:0 }, dauer:0.2 },
+
+    { id:"balkon", icon:"glight", name:"Balkon-Automatik (1. OG)",
+      desc:"Beleuchtung & Beschattung/Markise des OG-Balkons, Bewegungslicht.",
+      inBasis:[],
+      kosten:{ basic:420, standard:380, premium:520 }, dauer:0.3 },
+
+    { id:"praesenz", icon:"motion", name:"Anwesenheitssimulation & Urlaubsmodus",
+      desc:"Licht/Rollläden simulieren Anwesenheit; Abschreckung bei Abwesenheit.",
+      inBasis:["premium"],
+      kosten:{ basic:240, standard:200, premium:0 }, dauer:0.2, security:true },
+  ],
+};
+</script>
+<script>
+(function(){
+"use strict";
+var C = window.CFG, M = C.module, B = C.basis;
+var fmt = n => n.toLocaleString("de-DE") + " €";
+var reduced = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+var tier = "standard";
+var sel = {}; // id -> bool (доп. выбранные модули, сверх базы)
+
+var ICONS = { bulb:"i-bulb",thermo:"i-thermo",cam:"i-cam",lock:"i-lock",siren:"i-siren",roll:"i-roll",
+  sprink:"i-sprink",wallbox:"i-wallbox",pv:"i-pv",speaker:"i-speaker",proj:"i-proj",tv:"i-tv",
+  glight:"i-glight",motion:"i-motion",garage:"i-garage",poller:"i-poller" };
+
+function svgIcon(key){ return '<svg viewBox="0 0 20 20"><g transform="translate(10,10)"><use href="#'+ICONS[key]+'"/></g></svg>'; }
+
+// Module nach Kategorien gruppiert (nur Darstellung; CFG bleibt unverändert)
+var CATS = [
+  { label:"Sicherheit & Zutritt", ids:["alarm","locks","cam_garten","vorgarten_cam","garage","poller","praesenz"] },
+  { label:"Licht & Beschattung",  ids:["licht_alle","rollladen"] },
+  { label:"Klima & Energie",      ids:["hzg_einzel","pv","wallbox"] },
+  { label:"Außen & Garten",       ids:["bewaesser","balkon"] },
+  { label:"Multimedia",           ids:["multiroom","heimkino","tv"] },
+];
+
+// модуль входит в базу текущей стуфы?
+function inBasis(m){ return m.inBasis.indexOf(tier) > -1; }
+// модуль активен (в базе или выбран)?
+function active(m){ return inBasis(m) || !!sel[m.id]; }
+function price(m){ return m.kosten[tier] || 0; }
+function byId(id){ return M.find(function(x){ return x.id===id; }); }
+
+function calc(){
+  var b = B[tier];
+  var hw = b.hw, pers = 0, dauer = b.dauerWo;
+  b.persFix.forEach(r => pers += r[2]);
+  M.forEach(m => { if (!inBasis(m) && sel[m.id]){ // доплата за доп. модуль
+    // делим стоимость модуля 60/40 hw/pers условно для сводки
+    var k = price(m); hw += Math.round(k*0.6); pers += Math.round(k*0.4); dauer += (m.dauer||0);
+  }});
+  return { hw, pers, total: hw+pers, dauer, save: b.save };
+}
+
+// ---- карточки стуф: показываем суммарную базу ----
+function tierBasePrice(tk){
+  var b = B[tk], hw=b.hw, pers=0; b.persFix.forEach(r=>pers+=r[2]); return hw+pers;
+}
+
+function renderTierPrices(){
+  ["basic","standard","premium"].forEach(tk=>{
+    var el = document.getElementById("p"+tk.charAt(0).toUpperCase()+tk.slice(1));
+    el.textContent = "Basis ab " + fmt(tierBasePrice(tk)) + " · ~" + B[tk].dauerWo + " Wo.";
+  });
+}
+
+function renderBasis(){
+  var b = B[tier];
+  document.getElementById("bTierName").textContent = b.label;
+  document.getElementById("bList").innerHTML = b.enthalten.map(x=>{
+    var head = x.indexOf("Alles aus")===0;
+    return '<li'+(head?' class="head"':'')+'>'+x+'</li>';
+  }).join("");
+}
+
+function renderModules(){
+  var html = "";
+  CATS.forEach(function(cat){
+    var cards = "", act = 0, tot = 0;
+    cat.ids.forEach(function(id){
+      var m = byId(id); if(!m) return; tot++;
+      var incl = inBasis(m), on = active(m), p = price(m);
+      if (on) act++;
+      var priceHtml = incl
+        ? '<span class="mcard-price incl">inkl. <small>im Paket</small></span>'
+        : '<span class="mcard-price">'+(p?("+ "+fmt(p)):"+ 0 €")+' <small>Vollkosten</small></span>';
+      var tags = (m.security?'<span class="tag sec">🛡 Sicherheit</span>':'') + (incl?'<span class="tag incl">Basis</span>':'');
+      var note = (m.note && m.note[tier]) ? '<div class="mcard-note">↳ '+m.note[tier]+'</div>' : '';
+      cards += '<div class="mcard'+(on?' on':'')+(incl?' fixed':'')+'" data-id="'+m.id+'" role="button" tabindex="0" aria-pressed="'+on+'">'+
+        '<div class="mcard-top"><span class="mcard-ic">'+svgIcon(m.icon)+'</span><span class="sw" aria-hidden="true"></span></div>'+
+        '<div class="mcard-nm">'+m.name+' '+tags+'</div>'+
+        '<div class="mcard-ds">'+m.desc+'</div>'+note+
+        '<div class="mcard-foot">'+priceHtml+'</div></div>';
+    });
+    html += '<div class="mod-cat"><div class="mod-cat-h"><span>'+cat.label+'</span><span class="gc">'+act+'/'+tot+' aktiv</span></div><div class="mgrid">'+cards+'</div></div>';
+  });
+  document.getElementById("modList").innerHTML = html;
+  document.querySelectorAll("#modList .mcard").forEach(el=>{
+    var toggle = function(){
+      var id = el.dataset.id, m = byId(id);
+      if (inBasis(m)) return; // в базе — не трогаем
+      sel[id] = !sel[id]; update();
+    };
+    el.addEventListener("click", toggle);
+    el.addEventListener("keydown", function(e){
+      if (e.key==="Enter" || e.key===" "){ e.preventDefault(); toggle(); }
+    });
+  });
+}
+
+// ---- Sicherheit-Logik ----
+function securityState(){
+  var lvl = tier==="basic"?25:tier==="standard"?55:80;
+  var notes = [];
+  if (active(byId("cam_garten"))){ lvl+=10; notes.push("Perimeter-Kameras: Grundstücksgrenze inkl. Nachbarseite lückenlos — keine unbemerkte Annäherung"); }
+  if (active(byId("vorgarten_cam"))){ lvl+=6; notes.push("Vorgarten/Straßenseite überwacht (Erkennung beim Betreten)"); }
+  if (active(byId("garage"))){ lvl+=5; notes.push("Garage: alle 3 Zugänge gesichert, Nachbar-Grenze beachtet"); }
+  if (active(byId("poller"))){ lvl+=8; notes.push("Versenkbare Poller: physische Zufahrtssperre gegen unbefugtes Betreten"); }
+  if (active(byId("locks"))){ notes.push("Schlüssellose Zutrittskontrolle (Haus & Garten)"); }
+  if (active(byId("praesenz"))){ notes.push("Anwesenheitssimulation bei Abwesenheit"); }
+  if (active(byId("alarm"))){ notes.push("Vollwertige Alarmanlage mit Außensirene"); }
+  return { lvl: Math.min(100, lvl), notes: notes };
+}
+
+function renderSecurity(){
+  var s = securityState();
+  document.getElementById("secTxt").innerHTML = "Privatsphäre & Sicherheit sind Schwerpunkt. Alle Kameras erfassen DSGVO-konform <b>nur das eigene Grundstück</b> (Nachbarflächen werden per Privatzonen-Masking ausgeblendet); Aufnahmen werden lokal gespeichert.";
+  document.getElementById("secBar").style.width = s.lvl + "%";
+  document.getElementById("secScore").textContent = s.lvl + " %";
+  document.getElementById("secList").innerHTML = s.notes.length
+    ? s.notes.map(n=>"<li>"+n+"</li>").join("")
+    : "<li class='none'>Basis-Sicherheit aktiv — für lückenlosen Außenschutz Module zuschalten.</li>";
+  return s.lvl;
+}
+
+// ---- SVG ----
+var devs;
+function renderSvg(){
+  devs.forEach(d=>{
+    var on = false;
+    if (d.dataset.t) on = d.dataset.t.indexOf(tier.charAt(0)) > -1;
+    if (d.dataset.m){
+      var mid = d.dataset.m.replace("_fp","").replace("_vg","");
+      var m = byId(mid);
+      if (m) on = on || active(m);
+      // спец: fingerprint только premium+locks; vorgarten-sprink только если bewaesser
+      if (d.dataset.m==="locks_fp") on = (tier==="premium") && active(byId("locks"));
+      if (d.dataset.m==="bewaesser_vg") on = active(byId("bewaesser"));
+    }
+    if (d.id==="pvSolid"){ on = active(byId("pv")); }
+    d.classList.toggle("on", on);
+  });
+  // конусы камер
+  var cg = active(byId("cam_garten"));
+  ["cone_g1","cone_g2","cone_g3"].forEach(id=>document.getElementById(id).classList.toggle("on",cg));
+  document.getElementById("cone_v1").classList.toggle("on", active(byId("vorgarten_cam")));
+  document.getElementById("cone_ga").classList.toggle("on", active(byId("garage")));
+  document.getElementById("cone_base").classList.add("on");
+  var n = devs.filter(d=>d.classList.contains("on")).length;
+  document.getElementById("capCount").textContent = n + " Komponenten aktiv";
+}
+
+function countTo(el,target,suffix,dur){
+  if(reduced){el.textContent=suffix==="€"?fmt(target):target+suffix;return;}
+  var t0=performance.now();
+  (function step(now){var p=Math.min(1,(now-t0)/dur);p=1-Math.pow(1-p,3);
+    el.textContent=suffix==="€"?fmt(Math.round(target*p)):(target+suffix);
+    if(p<1)requestAnimationFrame(step);})(t0);
+}
+
+function update(){
+  var c = calc();
+  countTo(document.getElementById("sTotal"), c.total, "€", 700);
+  document.getElementById("sHw").textContent = fmt(c.hw);
+  document.getElementById("sPers").textContent = fmt(c.pers);
+  var dauerTxt = "~ " + (Math.round(c.dauer*2)/2) + " Wo.";
+  document.getElementById("sDauer").textContent = dauerTxt;
+  document.getElementById("sSave").textContent = "≥ " + c.save + " %" + (tier==="basic"?"":(tier==="standard"?" (15–20 %)":" (25–30 %)"));
+  document.getElementById("saveFill").style.width = (c.save/30*100) + "%";
+  renderModules();
+  var lvl = renderSecurity();
+  renderSvg();
+  // ---- Dock (sticky) spiegeln ----
+  document.getElementById("dockTotal").textContent = fmt(c.total);
+  document.getElementById("dockHw").textContent = fmt(c.hw);
+  document.getElementById("dockPers").textContent = fmt(c.pers);
+  document.getElementById("dockDauer").textContent = dauerTxt;
+  document.getElementById("dockSec").textContent = lvl + " %";
+}
+
+function setTier(tk){
+  tier = tk;
+  document.documentElement.dataset.tier = tk;
+  document.getElementById("hTier").textContent = B[tk].label;
+  document.getElementById("sTierChip").textContent = "Basis " + B[tk].label;
+  document.getElementById("dockTier").textContent = "Basis " + B[tk].label;
+  document.querySelectorAll(".tier").forEach(b=>{var on=b.dataset.t===tk;b.classList.toggle("active",on);b.setAttribute("aria-selected",on);});
+  renderBasis(); update();
+}
+
+// init
+document.getElementById("svg").innerHTML = document.getElementById("svgsrc").textContent;
+devs = Array.prototype.slice.call(document.querySelectorAll(".dev"));
+renderTierPrices();
+document.querySelectorAll(".tier").forEach(b=>b.addEventListener("click",()=>setTier(b.dataset.t)));
+document.addEventListener("keydown",e=>{
+  if(e.key!=="ArrowLeft"&&e.key!=="ArrowRight")return;
+  if(/^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName||"")))return;
+  var o=["basic","standard","premium"],i=o.indexOf(tier);
+  setTier(o[(i+(e.key==="ArrowRight"?1:-1)+3)%3]);
+});
+document.getElementById("hint").innerHTML = "Vollkostenrechnung je Modul: Hardware + Montage + Planungsanteil. Grün / „inkl.“ = bereits im Basis-Paket der Stufe (nicht abwählbar). Module mit „+ €“ werden in die Gesamtkosten aufaddiert; Dauer, Energie- & Sicherheits-Score aktualisieren sich live. Preise marktüblich Deutschland 06/2026, indikativ.";
+
+// Sticky-Dock einblenden, sobald die Hauptsumme aus dem Blick scrollt
+var dock = document.getElementById("dock");
+var sumEl = document.querySelector(".sum");
+if (window.IntersectionObserver && sumEl){
+  new IntersectionObserver(function(entries){
+    var off = !entries[0].isIntersecting;
+    dock.classList.toggle("show", off);
+    dock.setAttribute("aria-hidden", off ? "false" : "true");
+    document.body.classList.toggle("dock-pad", off);
+  }, { threshold:0 }).observe(sumEl);
+}
+
+setTier("standard");
+})();
+</script>
+
+</body>
+</html>
