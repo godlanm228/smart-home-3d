@@ -379,8 +379,8 @@ function loadTex(path, rx, ry, data){
 
 function init(){
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x1b2742);
-  scene.fog = new THREE.FogExp2(0x44506e, 0.014);
+  scene.background = new THREE.Color(0x0b1220);
+  scene.fog = new THREE.FogExp2(0x2a3550, 0.017);
 
   camera = new THREE.PerspectiveCamera(62, innerWidth/innerHeight, 0.1, 600);
 
@@ -471,7 +471,7 @@ function setSun(elevDeg, azimDeg){
   hemiLight.color.copy(HEMI_HORIZON).lerp(HEMI_DAY, k);
   hemiLight.intensity = 0.30 + 0.25*k;
   if(scene.fog) scene.fog.color.copy(FOG_HORIZON).lerp(FOG_DAY, k);
-  renderer.toneMappingExposure = 0.9 + 0.1*(1-k);                   // dunkler (Umgebung), Haus als Fokus
+  renderer.toneMappingExposure = 0.58 + 0.08*(1-k);                // deutlich dunkler/moodiger, Haus als Fokus
 }
 
 /* Bewegte Sonne über die Zeit + gedrosseltes Environment-Update (IBL aus dem aktuellen Himmel) */
@@ -542,7 +542,7 @@ function buildFurniture(){
   var trail=new THREE.Mesh(new THREE.BoxGeometry(9,0.55,0.05), tgl); trail.position.set(-2.5, EG+0.27, Dh+4.3); G.add(trail);
   [-1,1].forEach(function(s){ var tr2=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.55,4.0), tgl); tr2.position.set(-2.5+s*4.5, EG+0.27, Dh+2.3); G.add(tr2); });
   // GARAGE: zwei echte Autos (Hyper3D-GLB), nebeneinander
-  var CX=18;
+  var CX=13.0;
   function placeCar(url, cz){
     if(!gltfLoader) return;
     gltfLoader.load(url, function(gl){
@@ -568,61 +568,24 @@ function buildGround(){
 /* American-Vorort: zentrale Straße + Nachbar-Grundstücke ringsum, im Nebel verlaufend.
    Ersetzt die alte „Klötzchen-Stadt“. Wenige Details, schöne Texturen — unser Haus bleibt der Held. */
 function buildNeighborhood(){
+  // KEINE Nachbarn mehr — nur ferne Stadt-Silhouette im Nebel + dunkler Rasen-Rahmen ringsum.
   var N = new THREE.Group(); scene.add(N);
-  var yG = -FH;                                       // Bodenoberkante
-
-  // Strassen-/Boden-Materialien (eigene Maps mit höherer Wiederholung; Datei aus Cache)
-  var grassN  = new THREE.MeshStandardMaterial({ map:loadTex("assets/grass_diff.jpg",80,80), normalMap:loadTex("assets/grass_nor.jpg",80,80,true), roughnessMap:loadTex("assets/grass_rough.jpg",80,80,true), color:0x4ec225, roughness:1, metalness:0 });
-  var asphalt = new THREE.MeshStandardMaterial({ map:loadTex("assets/concrete.jpg",40,2), color:0x4a4d54, roughness:.95, metalness:0 });
-  var driveMat= new THREE.MeshStandardMaterial({ map:concreteTex, color:0xbfc3c8, roughness:.92, metalness:0 });
-
-  var seed=71; function rnd(){ seed=(seed*9301+49297)%233280; return seed/233280; }
-
-  // Zentrale Straße (entlang X) + Mittelstreifen + Bürgersteige
-  var roadZ=-18, roadLen=260, roadW=9;
-  var road=new THREE.Mesh(new THREE.BoxGeometry(roadLen,0.2,roadW), asphalt); road.position.set(0,yG+0.04,roadZ); road.receiveShadow=true; N.add(road);
-  var stripe=new THREE.Mesh(new THREE.BoxGeometry(roadLen,0.21,0.18), new THREE.MeshStandardMaterial({color:0xd9c45a,roughness:.6})); stripe.position.set(0,yG+0.07,roadZ); N.add(stripe);
-  [-1,1].forEach(function(s){ var sw=new THREE.Mesh(new THREE.BoxGeometry(roadLen,0.16,1.4), driveMat); sw.position.set(0,yG+0.02,roadZ+s*(roadW/2+0.8)); N.add(sw); });
-
-  // Großer Rasen rundum (knapp unter unserem Grundstück → unser Plot wirkt leicht erhöht)
-  // Boden als Rahmen (Aussparung vorm Haus für den Lichthof → KG sichtbar)
-  var GG=380, ghx=11, ghz=7;
+  var yG = -FH;
+  var grassN = new THREE.MeshStandardMaterial({ map:loadTex("assets/grass_diff.jpg",80,80), color:0x274a22, roughness:1, metalness:0 });
+  // Rasen-Rahmen mit zentraler Aussparung (Plot + Lichthof vorne bleiben frei → KG sichtbar)
+  var GG=420, ghx=16, ghz=22;
   function gn(w,d,x,z){ var m=new THREE.Mesh(new THREE.BoxGeometry(w,0.3,d), grassN); m.position.set(x,yG-0.18,z); m.receiveShadow=true; N.add(m); }
   gn(GG, GG/2-ghz, 0, -(ghz+(GG/2-ghz)/2));
   gn(GG, GG/2-ghz, 0,  (ghz+(GG/2-ghz)/2));
   gn(GG/2-ghx, 2*ghz, -(ghx+(GG/2-ghx)/2), 0);
   gn(GG/2-ghx, 2*ghz,  (ghx+(GG/2-ghx)/2), 0);
-
-  // Nachbar-Lots entlang der Straße (Häuser = echte prozedurale Blender-GLB, im Nebel)
-  // Haus-Front zeigt im Modell nach +Z (Blender -Y → glTF +Z). Straße bei z=roadZ.
-  var lots=[];
-  [-96,-72,-48,-24,0,24,48,72,96].forEach(function(x){ lots.push({x:x+(rnd()-.5)*4, z:-31+(rnd()-.5)*3, rot:0,        near:true}); });   // Nordseite (Front +Z zur Straße)
-  [-50,-74,-98].forEach(function(x){ lots.push({x:x+(rnd()-.5)*3, z:-8+(rnd()-.5)*2, rot:Math.PI, near:true}); });                       // unsere Seite links (Front -Z)
-  [50,74,98].forEach(function(x){ lots.push({x:x+(rnd()-.5)*3, z:-8+(rnd()-.5)*2, rot:Math.PI, near:true}); });                          // unsere Seite rechts
-  [-44,-8,28,60].forEach(function(x){ lots.push({x:x, z:48+(rnd()-.5)*4, rot:Math.PI, near:false}); });                                 // hintere Kulisse
-
-  if(gltfLoader){
-    var srcs=[null,null,null], got=0;
-    ["assets/house1.glb","assets/house2.glb","assets/house3.glb"].forEach(function(u,idx){
-      gltfLoader.load(u, function(g){
-        g.scene.traverse(function(o){ if(o.isMesh){ o.castShadow=false; o.receiveShadow=true; } });
-        srcs[idx]=g.scene; if(++got===3) placeHouses();
-      }, undefined, function(e){ console.warn(u+" load failed", e); });
-    });
-    function placeHouses(){
-      lots.forEach(function(lot,i){
-        var src=srcs[i%3]; if(!src) return;
-        var h=src.clone(true); h.position.set(lot.x, yG, lot.z); h.rotation.y=lot.rot; h.scale.setScalar(0.95+rnd()*0.25); N.add(h);
-        if(lot.near){ var dz=roadZ-lot.z, dv=new THREE.Mesh(new THREE.BoxGeometry(2.6,0.16,Math.max(2,Math.abs(dz)-2)), driveMat); dv.position.set(lot.x+3, yG+0.02, lot.z+dz/2); N.add(dv); }
-      });
-    }
-    // Bäume (echte GLB) — Straßenbäume + Vorgärten, im Nebel
-    gltfLoader.load("assets/tree1.glb", function(g){
-      g.scene.traverse(function(o){ if(o.isMesh){ o.castShadow=false; o.receiveShadow=true; } });
-      function tree(x,z,s){ var t=g.scene.clone(true); t.position.set(x,yG,z); t.rotation.y=rnd()*6.28; t.scale.setScalar(s); N.add(t); }
-      for(var tx=-118; tx<=118; tx+=15){ tree(tx+(rnd()-.5)*4, roadZ-roadW/2-2.6, 0.9+rnd()*0.6); tree(tx+(rnd()-.5)*4, roadZ+roadW/2+2.6, 0.9+rnd()*0.6); }
-      lots.forEach(function(lot){ if(rnd()<0.7) tree(lot.x+(rnd()-.5)*10, lot.z+(lot.rot===0?7:-7)+(rnd()-.5)*3, 0.8+rnd()*0.6); });
-    }, undefined, function(e){ console.warn("tree load failed", e); });
+  // ferne Stadt im Nebel — Ring aus tiefen, entsättigten Hochhäusern (nur Andeutung)
+  var cityMat=new THREE.MeshStandardMaterial({color:0x232c3e, roughness:1, metalness:0});
+  var seed=7; function rnd(){ seed=(seed*9301+49297)%233280; return seed/233280; }
+  for(var i=0;i<80;i++){
+    var ang=rnd()*Math.PI*2, rad=130+rnd()*100, h=10+rnd()*40, w=5+rnd()*8;
+    var b=new THREE.Mesh(new THREE.BoxGeometry(w,h,w), cityMat);
+    b.position.set(Math.cos(ang)*rad, yG+h/2, Math.sin(ang)*rad); b.rotation.y=rnd()*Math.PI; N.add(b);
   }
 }
 
@@ -655,6 +618,33 @@ function buildPlot(){
   var ringMat = new THREE.MeshBasicMaterial({color:BASIS[tier].accent, transparent:true, opacity:.5, side:THREE.DoubleSide});
   tierGlow = new THREE.Mesh(new THREE.RingGeometry(Wh+1.5, Wh+3.4, 64), ringMat);
   tierGlow.rotation.x=-Math.PI/2; tierGlow.position.y=-FH+0.13; scene.add(tierGlow);
+  // ---- Wege · Zufahrt · Blumenbeete · Zäune · Kamerapfosten ----
+  var conc=new THREE.MeshStandardMaterial({map:concreteTex,color:0xbfc3c8,roughness:.92});
+  var pave=new THREE.MeshStandardMaterial({map:concreteTex,color:0x9aa0a6,roughness:.9});
+  var gy0=-FH-0.12;
+  function pathSlab(w,d,x,z,m){ var s=new THREE.Mesh(new THREE.BoxGeometry(w,0.16,d),m||pave); s.position.set(x,gy0+0.08,z); s.receiveShadow=true; scene.add(s); }
+  pathSlab(7, 17, Wh+4.6, -Dh-7, conc);                 // Zufahrt Strasse → Garage
+  pathSlab(2.2, 11, 6.2, -Dh-6, pave);                  // Fussweg Strasse → Eingang
+  // Blumenbeete (Erde + bunte Blüten) entlang Fussweg + Zufahrtsrand
+  var bedMat=new THREE.MeshStandardMaterial({color:0x5e4126,roughness:1});
+  function bed(x,z,w,d){ var b=new THREE.Mesh(new THREE.BoxGeometry(w,0.22,d),bedMat); b.position.set(x,gy0+0.1,z); scene.add(b);
+    var COLS=[0xd14f6e,0xe8b84b,0xb05bd6,0xe0663a], k=Math.max(4,Math.round(w*d*1.0));
+    for(var f=0;f<k;f++){ var c=COLS[f%4]; var fl=new THREE.Mesh(new THREE.SphereGeometry(0.13,6,6),new THREE.MeshStandardMaterial({color:c,emissive:c,emissiveIntensity:0.3,roughness:.8}));
+      fl.position.set(x+(((f*53)%100)/100-0.5)*(w-0.3), gy0+0.3, z+(((f*811)%100)/100-0.5)*(d-0.3)); scene.add(fl);} }
+  bed(4.8,-Dh-6,0.7,9); bed(7.6,-Dh-6,0.7,9); bed(Wh+0.8,-Dh-8,0.7,7);
+  // Rasen-Variation: hellere/dunklere Flecken (kein Einheits-Teppich)
+  [[-9,Dh+8,11,8,0x3f7a2e],[8,Dh+10,9,7,0x2d5a20],[-13,-Dh-3,7,5,0x47842f]].forEach(function(p){
+    var pt=new THREE.Mesh(new THREE.BoxGeometry(p[2],0.32,p[3]),new THREE.MeshStandardMaterial({color:p[4],roughness:1})); pt.position.set(p[0],-FH-0.13,p[1]); pt.receiveShadow=true; scene.add(pt); });
+  // Zaun ums Grundstück (niedrig) + Kamerapfosten an den Ecken (DSGVO: nur eigenes Grundstück)
+  var postM=mat(0x2b3038,1,.5), railM2=mat(0x39424f,1,.5);
+  function fence(x1,z1,x2,z2){ var dx=x2-x1,dz=z2-z1,len=Math.hypot(dx,dz),ang=Math.atan2(dz,dx),n=Math.max(2,Math.round(len/2.4));
+    var rail=new THREE.Mesh(new THREE.BoxGeometry(len,0.12,0.06),railM2); rail.position.set((x1+x2)/2,gy0+0.95,(z1+z2)/2); rail.rotation.y=-ang; scene.add(rail);
+    for(var p=0;p<=n;p++){ var po=new THREE.Mesh(new THREE.BoxGeometry(0.1,1.15,0.1),postM); po.position.set(x1+dx*p/n,gy0+0.58,z1+dz*p/n); scene.add(po);} }
+  var LX=Wh+15, ZF=-Dh-12, ZB=Dh+15;
+  fence(-LX,ZF,LX,ZF); fence(-LX,ZB,LX,ZB); fence(-LX,ZF,-LX,ZB); fence(LX,ZF,LX,ZB);
+  [[-LX+2,ZF+2],[LX-2,ZF+2],[-LX+2,ZB-2],[LX-2,ZB-2]].forEach(function(c){
+    var pole=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.11,3.4,8),mat(0x2b3038,1,.4)); pole.position.set(c[0],gy0+1.7,c[1]); pole.castShadow=true; scene.add(pole);
+    var camB=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.25,0.5),mat(0x1b2128,1,.4)); camB.position.set(c[0],gy0+3.35,c[1]); scene.add(camB); });
   // Zonen-Labels
   label("GARTEN · 400 m²", 0, -FH+0.4, Dh+9, 0x9fd9b0, 4.2);
   label("VORGARTEN", -2, -FH+0.4, -Dh-5, 0x9fd9b0, 3.2);
@@ -674,20 +664,21 @@ function buildHouse(){
     {name:"EG",  y:0,     rooms:[["WOHNEN",300,410],["KÜCHE",410,520],["DIELE/WC",520,630]], col:0x2a3c54},
     {name:"1.OG",y:FH,    rooms:[["SCHLAF",300,383],["SCHLAF",383,465],["SCHLAF",465,547],["BAD/WC",547,630]], col:0x2a3c54},
     {name:"DG",  y:2*FH,  rooms:[["SCHLAF",300,383],["SCHLAF",383,465],["SCHLAF",465,547],["BAD/WC",547,630]], col:0x2a3c54},
-    {name:"DACHBODEN", y:3*FH, rooms:[["SPEICHER",300,465],["ABSTELL",465,630]], col:0x223044},
+    {name:"DACHBODEN", y:8.55, h:1.6, rooms:[["SPEICHER",300,465],["ABSTELL",465,630]], col:0x223044},  // Dachboden ~halbe Höhe
   ];
   // Geschossplatten + Räume
   floors.forEach(function(f){
+    var fh=f.h||FH;
     var fmat=mat(f.col,1,.85);
     if(f.name!=="KG"){ fmat.map=woodTex; fmat.color.setHex(0xffffff); fmat.roughness=.6; }  // Eiche EG/OG (Higgsfield)
     var slab=new THREE.Mesh(new THREE.BoxGeometry(W,0.18,D), fmat);
-    slab.position.set(0,f.y-FH/2+0.09,0); slab.receiveShadow=true; slab.castShadow=true; g.add(slab);
+    slab.position.set(0,f.y-fh/2+0.09,0); slab.receiveShadow=true; slab.castShadow=true; g.add(slab);
     // Geschoss-Tag
-    label(f.name, -Wh-1.1, f.y+1.2, FRONT+0.4, 0xbfd2e8, 2.0);
+    label(f.name, -Wh-1.1, f.y+fh*0.4, FRONT+0.4, 0xbfd2e8, 2.0);
     // Raumtrennwände (niedrig, transluzent) + Raum-Labels
     f.rooms.forEach(function(r,idx){
       var x0=lx(r[1]), x1=lx(r[2]), cx=(x0+x1)/2;
-      if(idx>0){ var wallH=FH-0.2, floorTop=f.y-FH/2+0.18, wd=D-0.4, wy=floorTop+wallH/2;
+      if(idx>0){ var wallH=fh-0.2, floorTop=f.y-fh/2+0.18, wd=D-0.4, wy=floorTop+wallH/2;
         var wall=new THREE.Mesh(new THREE.BoxGeometry(0.1,wallH,wd), mat(0xa9c4dd,0.4,.35));
         wall.position.set(x0, wy, 0); g.add(wall);
         var frM=new THREE.MeshStandardMaterial({color:0x4a6076, roughness:0.4, metalness:0.6, transparent:true, opacity:0.9});  // sichtbarer Rahmen → Raumkanten
@@ -702,7 +693,7 @@ function buildHouse(){
   var glass = glassMat(0xeaf2fb, 0.06);
   function exWall(w,h,x,y,z,ry){ var m2=new THREE.Mesh(new THREE.BoxGeometry(w,h,0.1), glass);
     m2.position.set(x,y,z); if(ry)m2.rotation.y=ry; g.add(m2); return m2; }
-  var stackH = 15.6, stackC = 3.1;                // KG-Boden bis Dachboden-Decke (5 Ebenen)
+  var stackH = 14.2, stackC = 2.35;               // KG-Boden bis Dachboden-Decke (5 Ebenen)
   exWall(W, stackH, 0, stackC, -Dh, 0);        // Front
   exWall(W, stackH, 0, stackC,  Dh, 0);        // Hinten
   exWall(D, stackH, -Wh, stackC, 0, Math.PI/2);// Links
@@ -712,14 +703,14 @@ function buildHouse(){
   base.material.map=concreteTex; base.position.set(0,-FH+0.1,0);   // Spanne -3.30..-2.70, Rasen-OK = -3.10
   base.castShadow=true; base.receiveShadow=true; g.add(base);
   // Eckstützen — geben dem Glashaus ablesbares Volumen
-  var postTop=3*FH+1.75, postBot=-FH-0.4, postH=postTop-postBot, postY=(postTop+postBot)/2;
+  var postTop=9.4, postBot=-FH-0.4, postH=postTop-postBot, postY=(postTop+postBot)/2;
   [[-Wh,-Dh],[Wh,-Dh],[-Wh,Dh],[Wh,Dh]].forEach(function(c){
     var post=new THREE.Mesh(new THREE.BoxGeometry(0.34,postH,0.34), mat(0x2b3442,1,.7));
     post.position.set(c[0],postY,c[1]); post.castShadow=true; g.add(post);
   });
 
   // Dach (Satteldach) über OG
-  var roofH=2.4, hw=Wh+0.3, hd=Dh+0.3, ey=3*FH+1.7;  // Dachansatz auf Dachboden-Decke
+  var roofH=2.4, hw=Wh+0.3, hd=Dh+0.3, ey=9.4;       // Dachansatz auf Dachboden-Decke (halbe Höhe)
   var ridge=ey+roofH;
   // Dachflächen als zwei schräge Boxen
   function roofPlane(sign){
@@ -747,18 +738,42 @@ function buildHouse(){
   [[balX-balW/2,FRONT],[balX+balW/2,FRONT],[balX-balW/2,balCZ+balD/2]].forEach(function(c){ var po=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.62,0.1), railM); po.position.set(c[0], ogFloor+0.29, c[1]); po.castShadow=true; g.add(po); });
   label("BALKON", balX, ogFloor+0.9, balCZ, 0xdce8f6, 1.6);
 
-  // Garage (rechts) — eigener Baukörper, Doppelgarage
-  var gw=9, gd=12, gh=3.2;
-  var gar=new THREE.Group(); gar.position.set(Wh+9, 0, -1);
-  var gfloor=new THREE.Mesh(new THREE.BoxGeometry(gw,0.2,gd), mat(0x1d2a3a,1,.85));
-  gfloor.position.y=-FH+0.1; gfloor.receiveShadow=true; gar.add(gfloor);
-  var gwall=glassMat(0xeaf2fb, 0.08);
-  [[gw,gh,0,gh/2-FH+0.1,-gd/2,0],[gw,gh,0,gh/2-FH+0.1,gd/2,0],[gd,gh,-gw/2,gh/2-FH+0.1,0,Math.PI/2],[gd,gh,gw/2,gh/2-FH+0.1,0,Math.PI/2]]
-    .forEach(function(a){ var m3=new THREE.Mesh(new THREE.BoxGeometry(a[0],a[1],0.1),gwall); m3.position.set(a[2],a[3],a[4]); if(a[5])m3.rotation.y=a[5]; gar.add(m3); });
-  var groof=new THREE.Mesh(new THREE.BoxGeometry(gw+.3,0.15,gd+.3), mat(0x24364d,1,.7));
-  groof.position.y=gh-FH+0.1; groof.castShadow=true; gar.add(groof);
-  label("GARAGE", Wh+9, gh-FH+0.7, -1, 0xdce8f6, 1.9);
+  // Garage — Doppelgarage, BÜNDIG am Haus (rechts). 3 Durchgänge (Haus/Garten/Vorgarten) + Toreinfahrt.
+  var gw=8.2, gd=11, gh=3.0, gx=Wh+gw/2-0.1;
+  var gar=new THREE.Group(); gar.position.set(gx, 0, -1);
+  var renderMat=mat(0xb7bac0,1,.9), doorMat=new THREE.MeshStandardMaterial({color:0x6e5942, roughness:.55, metalness:.3});
+  var panelMat=new THREE.MeshStandardMaterial({color:0x4a3c2c, roughness:.6});
+  var wy=gh/2-FH+0.1, dz=-gd/2;
+  var gfloor=new THREE.Mesh(new THREE.BoxGeometry(gw,0.2,gd), mat(0x2a3038,1,.9)); gfloor.position.y=-FH+0.1; gfloor.receiveShadow=true; gar.add(gfloor);
+  function gWall(w,h,d,x,y,z){ var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),renderMat); m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true; gar.add(m); }
+  gWall(0.2,gh,gd,  gw/2,wy,0);            // Außenwand rechts
+  gWall(0.2,gh,gd, -gw/2,wy,0);            // Wand zum Haus
+  gWall(gw,gh,0.2,  0,wy, gd/2);           // Rückwand (Garten)
+  // zwei Sektionaltore vorne (-Z, Straße) + Panel-Linien + Mittelpfeiler
+  [-1,1].forEach(function(s){
+    var dr=new THREE.Mesh(new THREE.BoxGeometry(3.3,2.5,0.12),doorMat); dr.position.set(s*1.95, 2.5/2-FH+0.2, dz); dr.castShadow=true; gar.add(dr);
+    for(var ln=1;ln<5;ln++){ var pl=new THREE.Mesh(new THREE.BoxGeometry(3.3,0.05,0.14),panelMat); pl.position.set(s*1.95, 2.5*ln/5-FH+0.2, dz+0.01); gar.add(pl);} });
+  gWall(0.5,gh,0.5, 0,wy,dz);
+  var groof=new THREE.Mesh(new THREE.BoxGeometry(gw+.5,0.18,gd+.5), mat(0x20262e,1,.7)); groof.position.y=gh-FH+0.1; groof.castShadow=true; gar.add(groof);
+  // 3 Durchgänge (Türen): Haus / Garten / Vorgarten
+  var passMat=mat(0x33404f,1,.5);
+  function door(w,h,d,x,y,z){ var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),passMat); m.position.set(x,y,z); gar.add(m); }
+  door(0.16,2.1,1.0,-gw/2+0.02,1.05-FH+0.1,2.6);   // → Haus
+  door(1.0,2.1,0.16,2.6,1.05-FH+0.1,gd/2-0.02);    // → Garten
+  door(1.0,2.1,0.16,-2.7,1.05-FH+0.1,dz+0.02);     // → Vorgarten
+  label("GARAGE", gx, gh-FH+0.8, -1, 0xdce8f6, 1.9);
   g.add(gar);
+
+  // ---- Hauseingang (EG, Diele rechts) ----
+  var EGs=-1.37, g0=-FH+0.1;
+  var eDoor=new THREE.Mesh(new THREE.BoxGeometry(1.5,2.3,0.16), mat(0x3a2f24,1,.5)); eDoor.position.set(6.2, EGs+1.15, FRONT-0.02); eDoor.castShadow=true; g.add(eDoor);
+  var eHandle=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.5,0.07), mat(0xcfd6dd,1,.3)); eHandle.position.set(6.75, EGs+1.1, FRONT-0.12); g.add(eHandle);
+  var canopy=new THREE.Mesh(new THREE.BoxGeometry(3.0,0.14,1.6), mat(0x2b3442,1,.6)); canopy.position.set(6.2, EGs+2.5, FRONT-0.85); canopy.castShadow=true; g.add(canopy);
+  for(var s2=0;s2<3;s2++){ var stp=new THREE.Mesh(new THREE.BoxGeometry(2.4,0.18,0.5), mat(0xb6bcc2,1,.9)); stp.position.set(6.2, g0+0.18+s2*((EGs-g0)/3), FRONT-1.5+s2*0.5); stp.receiveShadow=true; stp.castShadow=true; g.add(stp); }
+  // ---- Treppen zwischen den Ebenen (Diele, x≈3.4) ----
+  var stMat=mat(0x9aa6b4,1,.7);
+  function flight(yA,yB){ var n=6, dy=(yB-yA)/n; for(var i2=0;i2<n;i2++){ var st=new THREE.Mesh(new THREE.BoxGeometry(2.0,0.16,0.42), stMat); st.position.set(3.4, yA+dy*(i2+0.5), 1.2+i2*0.36); st.castShadow=true; st.receiveShadow=true; g.add(st);} }
+  flight(-4.47,-1.37); flight(-1.37,1.73); flight(1.73,4.83); flight(4.83,7.6);
 
   // sanfte Innenlichter (warm) — werden je nach Licht-Modulen intensiver
   [[-5,0.6,0],[3,0.6,0],[0,FH+0.6,0]].forEach(function(p){
@@ -897,31 +912,31 @@ var DEVINFO = {
 
 var STOPS = [
   {n:"Überblick",   loc:"Anflug",        cap:"Projekt Smart Home der Gruppe 7 — ein EFH (~180 m²) mit modularem Smart-Home-Konzept. Ihr Grundstück steht im Licht, die Stadt verschwimmt im Nebel.",
-   pos:[26,9,-30], look:[0,2,0]},
+   pos:[24,11,-26], look:[2,2,0]},
   {n:"Vorgarten",   loc:"Vorgarten & Straße", cap:"Zufahrt und Vorgarten: die Vorgarten-/Straßenkamera erkennt Annäherung schon am Tor. DSGVO-konform nur das eigene Grundstück.",
-   pos:[0,1.5,-23], look:[0,-0.5,-4]},
+   pos:[3,1,-19], look:[4,0,-7]},
   {n:"Eingang",     loc:"Eingang · Diele", cap:"Schlüsselloser Zutritt per Smart Lock (Premium zusätzlich Fingerprint), Video-Türklingel und Tür-/Fenstersensoren an allen EG-Zugängen.",
-   pos:[11,1,-21], look:[3,-0.6,-5]},
+   pos:[10,0.2,-13], look:[6.2,-0.3,-5.5]},
   {n:"Wohnen",      loc:"Wohnzimmer · EG", cap:"Hue-Licht, Multiroom-Audio, Samsung-TV und Heimkino-Szene. Einzelraum-Heizung mit Geofencing und Fenster-offen-Erkennung.",
-   pos:[-6,-0.3,-19], look:[-6,-0.8,1]},
+   pos:[-19,0,-5], look:[-6,-0.7,-1]},
   {n:"Küche",       loc:"Küche · EG",     cap:"Smarte Beleuchtung, vernetzte Geräte und Präsenzerkennung. Rollläden-Automatik nach Zeit, Sonne und Szene.",
-   pos:[0,-0.3,-19], look:[0,-0.8,2]},
+   pos:[2,-0.4,-15], look:[0,-0.9,2]},
   {n:"Schlafen 1.OG",loc:"Schlafzimmer · 1.OG", cap:"Drei Schlafzimmer + Bad/WC im 1.OG — Hue-Licht und tado°-Einzelraumregelung je Raum, Rauch-/CO-Melder auf allen Ebenen.",
-   pos:[-6.7,2.7,-19], look:[-6.7,1.9,1]},
+   pos:[-6.7,2.3,-14], look:[-6.7,1.8,1]},
   {n:"Dachgeschoss",loc:"Schlafzimmer · DG", cap:"Drei weitere Schlafzimmer + Bad/WC im Dachgeschoss — gleiche Smart-Ausstattung, Einzelraumregelung und Melder.",
-   pos:[-6.7,5.8,-19], look:[-6.7,5.0,1]},
+   pos:[15,5.3,-9], look:[-2,4.8,0]},
   {n:"Dachboden",   loc:"Speicher · Dachboden", cap:"Unbeheizter Dachboden (Speicher/Abstell). Vernetzte Rauchmelder bis unters Dach — lückenlose Brandfrüherkennung.",
-   pos:[0,8.8,-19], look:[0,8.0,1]},
-  {n:"Balkon",      loc:"Balkon · OG",    cap:"Balkon-Automatik: Beleuchtung, Beschattung/Markise und Bewegungslicht. Blick über den 400 m² Garten.",
-   pos:[21,3.5,-19], look:[7,2.2,-5]},
+   pos:[5,12,-8], look:[0,7.6,1]},
+  {n:"Balkon",      loc:"Balkon · 1.OG",  cap:"Balkon-Automatik: Beleuchtung, Beschattung/Markise und Bewegungslicht. Blick über den 400 m² Garten.",
+   pos:[15,3,-12], look:[7,2.2,-5]},
   {n:"Garten",      loc:"Garten · 400 m²", cap:"Perimeter-Kameras sichern die Grundstücksgrenze lückenlos — auch zur Nachbarseite. Automatische Bewässerung nach Bodenfeuchte, Mähroboter.",
-   pos:[0,2.5,25], look:[0,-0.5,4]},
+   pos:[0,3,23], look:[0,0.2,4]},
   {n:"Garage",      loc:"Garage & Zufahrt", cap:"Garagentor mit Sensorik an allen 3 Zugängen (Straße/Garten/Haus). 11-kW-Wallbox fürs E-Auto, versenkbare Poller als physische Zufahrtssperre.",
-   pos:[31,3,-13], look:[18,-1,-1]},
+   pos:[29,2,-8], look:[13,-1,-1]},
   {n:"Technik",     loc:"Technik · KG",   cap:"Im Keller: SmartThings-/KNX-Zentrale, lokaler NVR-Videospeicher (kein Cloud-Zwang) und zentrales Energiemonitoring.",
-   pos:[-6,-2.4,-21], look:[-6,-3.4,1]},
+   pos:[-6,-2,-15], look:[-6,-3.6,-2]},
   {n:"Sicherheit",  loc:"Sicherheits-Check", cap:"Gesamtbild: alle aktiven Kamera-Sichtfelder als rote Kegel. Schalten Sie rechts Module zu — Sicherheits-Score und Kosten reagieren sofort.",
-   pos:[28,17,-34], look:[0,3,0]},
+   pos:[26,16,-30], look:[0,3,0]},
 ];
 
 function buildCurves(){
