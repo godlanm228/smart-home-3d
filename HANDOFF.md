@@ -1,5 +1,9 @@
 # Handoff
 
+> ⚠️ CORRECTION (2026-06-29, from Vlad) — FLOOR STRUCTURE. Earlier "5 floors / Dachboden as a (half) floor" is **WRONG**.
+> Correct model: **4 Geschosse + Dachraum.** `keller`=Keller (BASEMENT, below ground) · `eg` · `og1` · `dachgeschoss` (TOP **living** floor, no living space above) · `dachboden` = the unfinished attic void **INSIDE the roof** (Speicher, unbeheizt), **NOT a stacked storey**. There is NO 2.OG.
+> Codex: in the 3D house, do NOT stack a Dachboden box — Dachboden is the roof interior. `src/data/floors.ts` + `AGENTS.md` updated.
+
 ## 2026-06-29 - Claude - Milestone 0.2a: real data ported
 
 What changed:
