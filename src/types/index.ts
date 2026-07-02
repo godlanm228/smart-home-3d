@@ -37,6 +37,30 @@ export interface PresentationScene {
   cutawayMode?: 'none' | 'roof-off' | 'floor-focus' | 'exploded'
 }
 
+/** Visual body of a device marker — picks a procedural mini-model. */
+export type DeviceKind =
+  | 'camera'
+  | 'doorbell'
+  | 'lock'
+  | 'fingerprint'
+  | 'siren'
+  | 'controlbox'
+  | 'wallbox'
+  | 'poller'
+  | 'sprinkler'
+  | 'mower'
+  | 'light'
+  | 'tv'
+  | 'speaker'
+  | 'thermostat'
+  | 'sensor'
+  | 'plug'
+  | 'rack'
+  | 'nvr'
+  | 'meter'
+  | 'smoke'
+  | 'pv'
+
 export interface DeviceInfo {
   id: string
   label: string
@@ -52,6 +76,10 @@ export interface DeviceInfo {
   cost?: number
   showCone?: boolean
   glowColor?: string
+  /** Procedural 3D body for the marker (fallback: glowing orb). */
+  kind?: DeviceKind
+  /** Where a camera looks — drives the aimed view cone + body orientation. */
+  coneTarget?: [number, number, number]
 }
 
 export interface PackageTier {

@@ -1,5 +1,25 @@
 # Handoff
 
+## 2026-07-02 - Claude - 0.4: device bodies + view cones + tooltips + HUD overhaul (SOLO MODE)
+
+> **Process change (Vlad):** the Codex/Claude two-agent split is over — Claude owns the whole codebase now. §6 boundary rules in the plan/AGENTS.md are obsolete.
+
+What changed:
+- **Devices are real objects now** (Vlad: no more colored orbs). `types`: `DeviceInfo.kind` (21 kinds) + `coneTarget`. New `scene/devices/DeviceModel.tsx`: procedural mini-models — camera (aimed body + lens), doorbell, lock, fingerprint pad, siren dome, garage control box, wallbox (screen/cable/socket), poller, sprinkler, mower (body+wheels), pendant light, TV, speaker, thermostat dial, presence sensor, plug, server rack / NVR (LED slots), energy meter, smoke detector, mini PV. Accent part = device glow colour (emissive, state-driven intensity). Soft small aura keeps devices findable at distance.
+- **Camera view zones**: aimed frustum cones from each camera to its `coneTarget` + ground footprint ring at the aim point; opacity scales none→focused→hover→selected. Camera bodies rotate toward their target.
+- **Hover / click flow**: hover → 3D glass tooltip (name, category · type, „Klicken für Details“) + cursor pointer; click → detailed right panel (category icon, DE status with tone colour, description, features, benefit callout, package/cost chips, close button; Esc also closes).
+- **HUD overhaul**: 14-item scene list column REMOVED (nav = top stepper + floor rail + ←/→); floor rail compact, vertically centred left; new bottom-left **SceneInfoCard** (index, title, description — the narration finally visible); metrics dock slimmed and moved bottom-right; RoomCards only on overview/summary; device panel restyled; top bar slimmed to 54 px; global compactness pass in `styles.css`.
+- Deleted `src/ui/SceneNavigation.tsx` (replaced by the above).
+
+How to test: `npm run dev` → hover any device (tooltip), click (panel + close), scene 13 Sicherheitsübersicht (all cones), scene 8 Keller (rack/NVR/meter models next to the GLB racks), scene 3 wallbox on the garage wall. `npm run build` passes, console clean.
+
+Known issues / next:
+- Marker mini-rack overlaps the GLB technik rack slightly (interactive handle vs prop) — nudge if it bothers.
+- `exploded` cutaway still falls back to full house; energy-flow animation for the PV scene pending; sprinkler spray static.
+- SummaryPanel.tsx is still an unused stub (display:none) — candidate for the summary scene later.
+
+---
+
 ## 2026-07-02 - Claude - 0.2c: environment rework (Vlad's feedback + Konfigurator (2))
 
 What changed (all Agent B files):

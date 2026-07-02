@@ -1,8 +1,10 @@
+import { Html } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { usePresentationStore } from '../../store/usePresentationStore'
 import type { DeviceInfo } from '../../types'
+import { DeviceModel, useAccentMaterial } from './DeviceModel'
 
 type DeviceMarkerProps = {
   device: DeviceInfo
@@ -11,57 +13,120 @@ type DeviceMarkerProps = {
   selected: boolean
 }
 
-const tempColor = new THREE.Color()
+const CATEGORY_DE: Record<DeviceInfo['category'], string> = {
+  security: 'Sicherheit',
+  energy: 'Energie',
+  comfort: 'Komfort',
+  climate: 'Klima',
+  media: 'Multimedia',
+  infrastructure: 'Infrastruktur',
+  garden: 'Garten',
+}
+
+/** Aimed view cone + ground footprint for camera devices. */
+function ViewCone({
+  delta,
+  color,
+  strength,
+}: {
+  delta: THREE.Vector3
+  color: string
+  strength: number
+}) {
+  const { quaternion, length, radius, midpoint } = useMemo(() => {
+    const length = delta.length()
+    const dir = delta.clone().normalize()
+    const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, -1, 0), dir)
+    return { quaternion, length, radius: length * 0.36, midpoint: dir.multiplyScalar(length / 2) }
+  }, [delta])
+
+  return (
+    <group>
+      <mesh position={midpoint} quaternion={quaternion}>
+        <coneGeometry args={[radius, length, 24, 1, true]} />
+        <meshBasicMaterial color={color} depthWrite={false} opacity={0.055 + strength * 0.11} side={THREE.DoubleSide} transparent />
+      </mesh>
+      {/* footprint ellipse on the ground at the aim point */}
+      <mesh position={[delta.x, delta.y + 0.04, delta.z]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[radius * 0.9, radius, 36]} />
+        <meshBasicMaterial color={color} depthWrite={false} opacity={0.25 + strength * 0.35} side={THREE.DoubleSide} transparent />
+      </mesh>
+    </group>
+  )
+}
 
 export function DeviceMarker({ device, focused, hovered, selected }: DeviceMarkerProps) {
   const groupRef = useRef<THREE.Group>(null)
-  const coreRef = useRef<THREE.Mesh>(null)
   const selectDevice = usePresentationStore((state) => state.selectDevice)
   const setHoveredDevice = usePresentationStore((state) => state.setHoveredDevice)
-  const color = useMemo(() => tempColor.clone().set(device.glowColor ?? '#39a9ff'), [device.glowColor])
+  const accent = useAccentMaterial(device.glowColor ?? '#39a9ff')
+  const haloColor = useMemo(() => new THREE.Color(device.glowColor ?? '#39a9ff'), [device.glowColor])
+
+  /** Camera bodies look at their cone target. */
+  const { aimQuaternion, coneDelta } = useMemo(() => {
+    if (!device.coneTarget) return { aimQuaternion: null, coneDelta: null }
+    const delta = new THREE.Vector3(
+      device.coneTarget[0] - device.position[0],
+      device.coneTarget[1] - device.position[1],
+      device.coneTarget[2] - device.position[2],
+    )
+    const helper = new THREE.Object3D()
+    helper.lookAt(delta)
+    return { aimQuaternion: helper.quaternion.clone(), coneDelta: delta }
+  }, [device.coneTarget, device.position])
+
+  useEffect(() => {
+    document.body.style.cursor = hovered ? 'pointer' : 'auto'
+    return () => {
+      document.body.style.cursor = 'auto'
+    }
+  }, [hovered])
 
   useFrame(({ clock }) => {
-    const pulse = 1 + Math.sin(clock.elapsedTime * 3.2 + device.position[0]) * 0.08
-    const baseScale = selected ? 1.42 : hovered ? 1.24 : focused ? 1.12 : 1
+    const pulse = focused ? 1 + Math.sin(clock.elapsedTime * 2.6 + device.position[0]) * 0.05 : 1
+    const baseScale = selected ? 1.3 : hovered ? 1.2 : 1
     groupRef.current?.scale.setScalar(baseScale * pulse)
-
-    const material = coreRef.current?.material
-    if (material instanceof THREE.MeshStandardMaterial) {
-      material.emissiveIntensity = selected || hovered ? 3.8 : focused ? 2.4 : 1.45
-    }
+    accent.emissiveIntensity = selected ? 3.4 : hovered ? 2.8 : focused ? 2.0 : 1.25
   })
 
+  const strength = selected ? 1 : hovered ? 0.8 : focused ? 0.45 : 0
+
   return (
-    <group
-      ref={groupRef}
-      position={device.position}
-      onClick={(event) => {
-        event.stopPropagation()
-        selectDevice(device.id)
-      }}
-      onPointerOut={() => setHoveredDevice(null)}
-      onPointerOver={(event) => {
-        event.stopPropagation()
-        setHoveredDevice(device.id)
-      }}
-    >
-      <mesh ref={coreRef}>
-        <sphereGeometry args={[0.16, 24, 24]} />
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={1.7} roughness={0.32} />
-      </mesh>
-      <mesh>
-        <sphereGeometry args={[0.38, 24, 24]} />
-        <meshBasicMaterial color={color} transparent opacity={selected || hovered ? 0.28 : 0.14} depthWrite={false} />
-      </mesh>
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.48, 0.018, 10, 42]} />
-        <meshBasicMaterial color={color} transparent opacity={0.68} />
-      </mesh>
-      {device.showCone ? (
-        <mesh position={[0, -0.08, 1.15]} rotation={[Math.PI / 2, 0, 0]}>
-          <coneGeometry args={[0.75, 2.4, 32, 1, true]} />
-          <meshBasicMaterial color={color} transparent opacity={hovered || selected ? 0.18 : 0.08} side={THREE.DoubleSide} />
+    <group position={device.position}>
+      <group
+        onClick={(event) => {
+          event.stopPropagation()
+          selectDevice(device.id)
+        }}
+        onPointerOut={() => setHoveredDevice(null)}
+        onPointerOver={(event) => {
+          event.stopPropagation()
+          setHoveredDevice(device.id)
+        }}
+        ref={groupRef}
+      >
+        <group quaternion={aimQuaternion ?? undefined}>
+          <DeviceModel accent={accent} emissiveBoost={strength} kind={device.kind ?? 'sensor'} />
+        </group>
+        {/* soft aura so devices stay findable at distance */}
+        <mesh>
+          <sphereGeometry args={[0.24, 14, 14]} />
+          <meshBasicMaterial color={haloColor} depthWrite={false} opacity={selected || hovered ? 0.11 : focused ? 0.08 : 0.05} transparent />
         </mesh>
+      </group>
+
+      {coneDelta ? <ViewCone color={device.glowColor ?? '#39a9ff'} delta={coneDelta} strength={strength} /> : null}
+
+      {hovered && !selected ? (
+        <Html center distanceFactor={11} position={[0, 0.6, 0]} zIndexRange={[2, 1]}>
+          <div className="deviceTip">
+            <span className="deviceTipTitle">{device.label}</span>
+            <span className="deviceTipMeta">
+              {CATEGORY_DE[device.category]} · {device.shortLabel}
+            </span>
+            <span className="deviceTipHint">Klicken für Details</span>
+          </div>
+        </Html>
       ) : null}
     </group>
   )

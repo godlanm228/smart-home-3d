@@ -3,7 +3,7 @@ import { DeviceInfoPanel } from './DeviceInfoPanel'
 import { FloorSelector } from './FloorSelector'
 import { MetricsDock } from './MetricsDock'
 import { RoomCards } from './RoomCards'
-import { SceneNavigation } from './SceneNavigation'
+import { SceneInfoCard } from './SceneInfoCard'
 import { StartOverlay } from './StartOverlay'
 import { TopBar } from './TopBar'
 
@@ -15,8 +15,8 @@ export function Layout() {
       </div>
       <div className="hud">
         <TopBar />
-        <SceneNavigation />
         <FloorSelector />
+        <SceneInfoCard />
         <DeviceInfoPanel />
         <MetricsDock />
         <RoomCards />
