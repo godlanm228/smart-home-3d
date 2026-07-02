@@ -1,5 +1,20 @@
 # Handoff
 
+## 2026-07-02 - Claude - 0.2c: environment rework (Vlad's feedback + Konfigurator (2))
+
+What changed (all Agent B files):
+- **Plot relayout**: the house now sits at the FRONT of the plot; big garden behind. `Ground.tsx`: `PLOT = {x:22, zFront:12.5, zBack:-34}`, street strip in front (grass verge → sidewalk → asphalt road with centre markings), driveway/footpath reach the sidewalk, stepping-stone S-path from the terrace into the garden, natural grass tint `#3f9a2e` (repeat 16, stronger normals), front beds relocated, garden tone patches, labels (GARTEN moved deep into the garden, STRASSE added).
+- **Garden** (`Garden.tsx`): new low modern fence (dark posts + 3 wooden slats) with gates at footpath/driveway; 3 benches; 6 warm bollard lamps (2 with real point lights, rest emissive-only for perf); 4 pop-up sprinklers with translucent spray domes; 4 flower beds (improved `FlowerBed`: stems + varied blossom sizes, exported from Ground); 10 trees; 700 instanced grass tufts (single draw call, seeded, keeps the path corridor clear).
+- **Background** (`Skyline.tsx`): tower ring replaced by a suburb — gable-roof house silhouettes (cluster across the street + ring at r 62–117) with occasional warm windows, tree blobs, subtle hills at r ~170 (inside the 180 far plane).
+- Devices: garden cameras → back fence corners, irrigation → on a sprinkler, mower/poller repositioned. Scenes: overview/garden/terrace/security/summary reframed for the new layout.
+- Konfigurator (2).html checked: `data-tier="standard"` (die Professorin wählte Standard) — app default already Standard, no data change needed. Note: the new konfigurator labels the top living floor "2.OG"; our `dachgeschoss` is the same storey (4 Geschosse + Dachboden unchanged).
+
+How to test: `npm run dev` → scenes 1 (overview), 2 (street/entrance), 6 (terrace + path), 7 (garden: benches/lamps/sprinklers/beds). `npm run build` passes; console clean.
+
+Known issues: benches/lamps are subtle at dusk from wide shots (by design — house stays the hero); sprinkler spray is a static cone (animate in 0.4+ if wanted).
+
+---
+
 ## 2026-07-02 - Claude - Milestone 0.2b: real house + environment + cutaway
 
 What changed:
