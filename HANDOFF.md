@@ -1,5 +1,22 @@
 # Handoff
 
+## 2026-07-02 - Claude - 0.5: exploded view, energy flow, focus staging, menu & HUD polish
+
+What changed:
+- **Exploded view** (Sicherheitsübersicht): storeys glide apart vertically (`ExplodeGroup` damping, step 1.5 m) — floors, glass bands, furniture, balcony, roof+attic and device markers all ride their storey; stairs hide (they would dangle). `useFloorOffsets`/`offsetFor` in CutawayController.
+- **Energy flow** (Dach & Energie): golden particle streams along two Catmull-Rom paths PV→Keller-Energiemonitor and PV→Wallbox, with faint guide tubes (instanced dots, `scene/effects/EnergyFlow.tsx`).
+- **Sprinklers animated**: three rotating water jets per sprinkler (phase-offset) + spray dome.
+- **Focus staging** («лишнего не видно»): devices not on the scene's `visibleFloorIds` are hidden entirely; devices visible but not in `focusDeviceIds` shrink to 0.86×, drop accent glow to 0.55 and lose their cones. Focus devices pulse gently. Result: each stop presents ONLY its objects.
+- **Smoother transitions**: camera ease `power3.inOut`, duration ×1.25, FOV now tweened (was an instant jump).
+- **HUD fixes** (Vlad's list): stepper meta fixed at 210 px — arrows no longer shift with scene-name length; floor-rail sublabels shortened (texts stayed inside bounds); hamburger **menu now opens**: Projekt & Credits (Gruppe 7 / HRW / Betreuung + „Konzept · Visualisierung · Entwicklung: Vlad“), Arbeitspakete list, Steuerung; closes on outside click/Esc.
+- **Arbeitspakete**: `PresentationScene.workPackage` + gold AP chip in the scene info card; every scene tagged (AP 1 Überblick · AP 3 Infrastruktur · AP 4 Sicherheit · AP 5 Komfort · AP 6 Garten · AP 7 Energie).
+
+> ⚠️ AP-Nummern/Namen sind PLATZHALTER nach Konfigurator-Logik — Vlad liefert die echte WBS des Teams, dann in `data/scenes.ts` + `ui/TopBar.tsx` (WORK_PACKAGES) ersetzen. Credits-Zeile ebenso („Vlad“ → voller Name/Team).
+
+How to test: scene 13 (exploded + cones), scene 12 (energy flow), scene 7 (rotating sprinklers), any interior scene (only its devices visible), menu button top-right, stepper arrows static across scenes. `npm run build` passes, console clean.
+
+---
+
 ## 2026-07-02 - Claude - 0.4: device bodies + view cones + tooltips + HUD overhaul (SOLO MODE)
 
 > **Process change (Vlad):** the Codex/Claude two-agent split is over — Claude owns the whole codebase now. §6 boundary rules in the plan/AGENTS.md are obsolete.

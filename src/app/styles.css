@@ -166,10 +166,88 @@ button {
     transform 160ms ease;
 }
 
-.iconButton:hover {
+.iconButton:hover,
+.iconButton.isActive {
   border-color: var(--line-strong);
   background: rgba(57, 169, 255, 0.13);
   transform: translateY(-1px);
+}
+
+/* ---------- hamburger menu ---------- */
+
+.ambient {
+  position: relative;
+}
+
+.menuPanel {
+  position: absolute;
+  top: 44px;
+  right: 0;
+  width: 264px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  text-align: left;
+  cursor: default;
+}
+
+.menuSection + .menuSection {
+  margin-top: 12px;
+  padding-top: 11px;
+  border-top: 1px solid rgba(232, 238, 246, 0.09);
+}
+
+.menuTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 6px;
+  color: var(--blue);
+  font-size: 9.5px;
+  font-weight: 760;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.menuLine {
+  margin: 3px 0;
+  color: #c3d3e2;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.menuLine.strong {
+  color: #eef7ff;
+  font-weight: 720;
+}
+
+.menuLine.dim {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.menuLine.credits b {
+  color: #eef7ff;
+}
+
+.menuList {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: #c3d3e2;
+  font-size: 10.5px;
+}
+
+.menuList li::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: 7px;
+  border-radius: 999px;
+  background: var(--blue);
+  vertical-align: 1px;
 }
 
 .stepper {
@@ -179,18 +257,21 @@ button {
   color: var(--text);
 }
 
+/* fixed width — the arrows must not shift when the scene name changes */
 .stepperMeta {
-  min-width: 112px;
+  width: 210px;
+  flex: 0 0 210px;
   text-align: center;
 }
 
 .sceneCount {
   font-size: 13px;
   font-weight: 760;
+  font-variant-numeric: tabular-nums;
 }
 
 .sceneName {
-  max-width: 190px;
+  max-width: 100%;
   margin-top: 1px;
   overflow: hidden;
   color: var(--muted);
@@ -331,6 +412,20 @@ button {
   color: #c3d3e2;
   font-size: 11.5px;
   line-height: 1.5;
+}
+
+.apChip {
+  display: inline-block;
+  margin-top: 9px;
+  padding: 3px 9px;
+  border: 1px solid rgba(243, 180, 63, 0.44);
+  border-radius: 999px;
+  background: rgba(243, 180, 63, 0.1);
+  color: #ffd88f;
+  font-size: 9.5px;
+  font-weight: 740;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 /* ---------- device panel (right) ---------- */

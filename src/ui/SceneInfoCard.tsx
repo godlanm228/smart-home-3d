@@ -17,6 +17,7 @@ export function SceneInfoCard() {
         </div>
       </div>
       <p className="sceneInfoText">{scene.description}</p>
+      {scene.workPackage ? <span className="apChip">{scene.workPackage}</span> : null}
     </section>
   )
 }

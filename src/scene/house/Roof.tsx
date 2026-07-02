@@ -4,7 +4,7 @@ import * as THREE from 'three'
 import { CanvasLabel } from '../CanvasLabel'
 import { EAVES_Y, HD, HOUSE_D, HOUSE_W, HW, RIDGE_Y, ROOF_H, SLAB_T } from '../constants'
 import { glassMat } from '../materials'
-import { useCutaway } from './CutawayController'
+import { ExplodeGroup, useCutaway, useFloorOffsets } from './CutawayController'
 
 const OVERHANG = 0.3
 const RW = HW + OVERHANG
@@ -69,6 +69,7 @@ function PVArray() {
  */
 export function Roof() {
   const { roofHidden, atticHidden } = useCutaway()
+  const offsets = useFloorOffsets()
   const [diff, nor, rough] = useTexture([
     '/textures/roof_diff.jpg',
     '/textures/roof_nor.jpg',
@@ -94,7 +95,7 @@ export function Roof() {
   }, [diff, nor, rough])
 
   return (
-    <group>
+    <ExplodeGroup target={offsets.roof}>
       {/* Attic interior (Dachboden = Speicher inside the roof, not a storey) */}
       <group visible={!atticHidden}>
         <mesh position={[0, EAVES_Y + SLAB_T / 2, 0]} receiveShadow>
@@ -137,6 +138,6 @@ export function Roof() {
         <GableGlass z={-(RD - 0.05)} />
         <PVArray />
       </group>
-    </group>
+    </ExplodeGroup>
   )
 }

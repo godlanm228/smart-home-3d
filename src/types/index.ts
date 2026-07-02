@@ -35,6 +35,8 @@ export interface PresentationScene {
   focusDeviceIds?: string[]
   visibleFloorIds?: FloorId[]
   cutawayMode?: 'none' | 'roof-off' | 'floor-focus' | 'exploded'
+  /** Arbeitspaket tag (PM course WBS), e.g. "AP 4 · Sicherheit & Zutritt". */
+  workPackage?: string
 }
 
 /** Visual body of a device marker — picks a procedural mini-model. */

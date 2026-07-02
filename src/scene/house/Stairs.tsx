@@ -10,10 +10,12 @@ const FLIGHTS: Array<{ floor: 'keller' | 'eg' | 'og1'; from: number; to: number 
   { floor: 'og1', from: FLOOR_TOP.og1, to: FLOOR_TOP.dachgeschoss },
 ]
 
-/** Stair flights in the Diele (x ≈ 3.4). Each flight belongs to its lower storey. */
+/** Stair flights in the Diele (x ≈ 3.4). Each flight belongs to its lower storey.
+ *  Hidden entirely in the exploded view (they would dangle between storeys). */
 export function Stairs() {
-  const { hiddenFloors } = useCutaway()
+  const { hiddenFloors, exploded } = useCutaway()
   const steps = 6
+  if (exploded) return null
   return (
     <group>
       {FLIGHTS.map(({ floor, from, to }) => {

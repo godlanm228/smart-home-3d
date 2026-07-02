@@ -15,7 +15,7 @@ import {
   STOREY_H,
 } from '../constants'
 import { glassMat, partitionFrameMat } from '../materials'
-import { useCutaway } from './CutawayController'
+import { ExplodeGroup, useCutaway, useFloorOffsets } from './CutawayController'
 
 type StoreyId = keyof typeof FLOOR_BASE
 
@@ -108,6 +108,7 @@ function Partition({ x, base }: { x: number; base: number }) {
  */
 export function FloorStack() {
   const { hiddenFloors } = useCutaway()
+  const offsets = useFloorOffsets()
   const wood = useTexture('/textures/wood.jpg')
 
   const woodMat = useMemo(() => {
@@ -126,7 +127,7 @@ export function FloorStack() {
         const base = FLOOR_BASE[id]
         const rooms = ROOMS[id]
         return (
-          <group key={id} visible={!hiddenFloors.has(id)}>
+          <ExplodeGroup key={id} target={offsets[id]} visible={!hiddenFloors.has(id)}>
             <mesh castShadow position={[0, base + SLAB_T / 2, 0]} receiveShadow>
               <boxGeometry args={[HOUSE_W, SLAB_T, HOUSE_D]} />
               <primitive attach="material" object={id === 'keller' ? kellerSlabMat : woodMat} />
@@ -159,7 +160,7 @@ export function FloorStack() {
                 text={label}
               />
             ))}
-          </group>
+          </ExplodeGroup>
         )
       })}
     </group>

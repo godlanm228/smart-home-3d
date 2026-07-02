@@ -2,8 +2,9 @@ import { Html } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
-import { usePresentationStore } from '../../store/usePresentationStore'
+import { selectCurrentScene, usePresentationStore } from '../../store/usePresentationStore'
 import type { DeviceInfo } from '../../types'
+import { offsetFor, useFloorOffsets } from '../house/CutawayController'
 import { DeviceModel, useAccentMaterial } from './DeviceModel'
 
 type DeviceMarkerProps = {
@@ -56,11 +57,19 @@ function ViewCone({
 }
 
 export function DeviceMarker({ device, focused, hovered, selected }: DeviceMarkerProps) {
-  const groupRef = useRef<THREE.Group>(null)
+  const rootRef = useRef<THREE.Group>(null)
+  const bodyRef = useRef<THREE.Group>(null)
+  const scene = usePresentationStore(selectCurrentScene)
   const selectDevice = usePresentationStore((state) => state.selectDevice)
   const setHoveredDevice = usePresentationStore((state) => state.setHoveredDevice)
   const accent = useAccentMaterial(device.glowColor ?? '#39a9ff')
   const haloColor = useMemo(() => new THREE.Color(device.glowColor ?? '#39a9ff'), [device.glowColor])
+  const offsets = useFloorOffsets()
+
+  /** Presentation focus: irrelevant devices leave the stage, others step back. */
+  const onVisibleFloor = !scene.visibleFloorIds || scene.visibleFloorIds.includes(device.floor)
+  const hasFocusList = (scene.focusDeviceIds?.length ?? 0) > 0
+  const dimmed = !focused && !hovered && !selected && hasFocusList
 
   /** Camera bodies look at their cone target. */
   const { aimQuaternion, coneDelta } = useMemo(() => {
@@ -82,17 +91,25 @@ export function DeviceMarker({ device, focused, hovered, selected }: DeviceMarke
     }
   }, [hovered])
 
-  useFrame(({ clock }) => {
+  const yOffset = offsetFor(offsets, device.floor)
+
+  useFrame(({ clock }, delta) => {
+    const root = rootRef.current
+    if (root) {
+      root.position.y = THREE.MathUtils.damp(root.position.y, device.position[1] + yOffset, 3.2, delta)
+    }
     const pulse = focused ? 1 + Math.sin(clock.elapsedTime * 2.6 + device.position[0]) * 0.05 : 1
-    const baseScale = selected ? 1.3 : hovered ? 1.2 : 1
-    groupRef.current?.scale.setScalar(baseScale * pulse)
-    accent.emissiveIntensity = selected ? 3.4 : hovered ? 2.8 : focused ? 2.0 : 1.25
+    const baseScale = selected ? 1.3 : hovered ? 1.2 : dimmed ? 0.86 : 1
+    bodyRef.current?.scale.setScalar(baseScale * pulse)
+    accent.emissiveIntensity = selected ? 3.4 : hovered ? 2.8 : focused ? 2.2 : dimmed ? 0.55 : 1.25
   })
+
+  if (!focused && !selected && !onVisibleFloor) return null
 
   const strength = selected ? 1 : hovered ? 0.8 : focused ? 0.45 : 0
 
   return (
-    <group position={device.position}>
+    <group position={device.position} ref={rootRef}>
       <group
         onClick={(event) => {
           event.stopPropagation()
@@ -103,7 +120,7 @@ export function DeviceMarker({ device, focused, hovered, selected }: DeviceMarke
           event.stopPropagation()
           setHoveredDevice(device.id)
         }}
-        ref={groupRef}
+        ref={bodyRef}
       >
         <group quaternion={aimQuaternion ?? undefined}>
           <DeviceModel accent={accent} emissiveBoost={strength} kind={device.kind ?? 'sensor'} />
@@ -111,11 +128,16 @@ export function DeviceMarker({ device, focused, hovered, selected }: DeviceMarke
         {/* soft aura so devices stay findable at distance */}
         <mesh>
           <sphereGeometry args={[0.24, 14, 14]} />
-          <meshBasicMaterial color={haloColor} depthWrite={false} opacity={selected || hovered ? 0.11 : focused ? 0.08 : 0.05} transparent />
+          <meshBasicMaterial
+            color={haloColor}
+            depthWrite={false}
+            opacity={selected || hovered ? 0.11 : focused ? 0.09 : dimmed ? 0.02 : 0.05}
+            transparent
+          />
         </mesh>
       </group>
 
-      {coneDelta ? <ViewCone color={device.glowColor ?? '#39a9ff'} delta={coneDelta} strength={strength} /> : null}
+      {coneDelta && !dimmed ? <ViewCone color={device.glowColor ?? '#39a9ff'} delta={coneDelta} strength={strength} /> : null}
 
       {hovered && !selected ? (
         <Html center distanceFactor={11} position={[0, 0.6, 0]} zIndexRange={[2, 1]}>

@@ -13,11 +13,11 @@ export interface FloorMeta {
  *  dachboden = the unfinished attic void INSIDE the roof (Speicher, unbeheizt) — NOT a storey.
  *  There is NO 2.OG. */
 export const FLOORS: FloorMeta[] = [
-  { id: 'dachboden', label: 'Dachboden', sublabel: 'Dachraum im Dach · kein Geschoss (unbeheizt)', rooms: ['Speicher'] },
+  { id: 'dachboden', label: 'Dachboden', sublabel: 'Speicher (unbeheizt)', rooms: ['Speicher'] },
   { id: 'dachgeschoss', label: 'Dachgeschoss', sublabel: 'Schlafräume & Bad', rooms: ['Schlafen', 'Schlafen', 'Schlafen', 'Bad/WC'] },
-  { id: 'og1', label: '1. OG', sublabel: 'Schlafräume & Balkon', rooms: ['Schlafen', 'Schlafen', 'Schlafen', 'Bad/WC', 'Balkon'] },
+  { id: 'og1', label: '1. OG', sublabel: 'Schlafen & Balkon', rooms: ['Schlafen', 'Schlafen', 'Schlafen', 'Bad/WC', 'Balkon'] },
   { id: 'eg', label: 'EG', sublabel: 'Wohnen & Küche', rooms: ['Wohnen', 'Küche', 'Diele/WC', 'Terrasse'] },
-  { id: 'keller', label: 'KG', sublabel: 'Keller · Untergeschoss (Technik)', rooms: ['Technik', 'Waschen', 'Lager'] },
-  { id: 'garage', label: 'Garage', sublabel: 'Doppelgarage · 3 Zugänge', rooms: ['Garage'] },
-  { id: 'outdoor', label: 'Garten', sublabel: 'Garten & Grundstück', rooms: ['Vorgarten', 'Garten 400 m²', 'Zufahrt'] },
+  { id: 'keller', label: 'KG', sublabel: 'Keller · Technik', rooms: ['Technik', 'Waschen', 'Lager'] },
+  { id: 'garage', label: 'Garage', sublabel: '3 Zugänge', rooms: ['Garage'] },
+  { id: 'outdoor', label: 'Garten', sublabel: 'Grundstück', rooms: ['Vorgarten', 'Garten 400 m²', 'Zufahrt'] },
 ]

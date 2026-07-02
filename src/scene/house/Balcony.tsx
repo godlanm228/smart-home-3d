@@ -1,6 +1,7 @@
 import { CanvasLabel } from '../CanvasLabel'
 import { FLOOR_TOP, FRONT_Z, HW } from '../constants'
 import { railGlassMat, railMetalMat, structureMat } from '../materials'
+import { ExplodeGroup, useFloorOffsets } from './CutawayController'
 
 const BAL_W = 4.5
 const BAL_D = 2.4
@@ -25,8 +26,9 @@ function RailSegment({ w, d, x, z }: { w: number; d: number; x: number; z: numbe
 
 /** Recessed corner loggia on the 1.OG (front-right, flush with the facade). */
 export function Balcony() {
+  const offsets = useFloorOffsets()
   return (
-    <group>
+    <ExplodeGroup target={offsets.og1}>
       <mesh castShadow position={[BAL_X, FLOOR_Y - 0.09, BAL_Z]} receiveShadow>
         <boxGeometry args={[BAL_W, 0.18, BAL_D]} />
         <primitive attach="material" object={structureMat} />
@@ -44,6 +46,6 @@ export function Balcony() {
         </mesh>
       ))}
       <CanvasLabel color="#dce8f6" position={[BAL_X, FLOOR_Y + 0.9, BAL_Z]} scale={1.6} text="BALKON" />
-    </group>
+    </ExplodeGroup>
   )
 }

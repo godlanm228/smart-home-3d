@@ -1,5 +1,6 @@
 import { Clone, Instances, Instance, useGLTF } from '@react-three/drei'
-import { useMemo } from 'react'
+import { useFrame } from '@react-three/fiber'
+import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { FlowerBed, PLOT } from './Ground'
 
@@ -106,8 +107,13 @@ function GardenLamp({ x, z, lit = false }: { x: number; z: number; lit?: boolean
   )
 }
 
-/** Pop-up sprinkler with a translucent spray dome. */
-function Sprinkler({ x, z }: { x: number; z: number }) {
+/** Pop-up sprinkler: faint spray dome + three rotating water jets. */
+function Sprinkler({ x, z, phase = 0 }: { x: number; z: number; phase?: number }) {
+  const jetsRef = useRef<THREE.Group>(null)
+  useFrame(({ clock }) => {
+    const jets = jetsRef.current
+    if (jets) jets.rotation.y = clock.elapsedTime * 1.9 + phase
+  })
   return (
     <group position={[x, 0, z]}>
       <mesh position={[0, 0.07, 0]}>
@@ -122,6 +128,14 @@ function Sprinkler({ x, z }: { x: number; z: number }) {
         <coneGeometry args={[1.15, 0.72, 18, 1, true]} />
         <primitive attach="material" object={sprayMat} />
       </mesh>
+      <group position={[0, 0.16, 0]} ref={jetsRef}>
+        {[0, (Math.PI * 2) / 3, (Math.PI * 4) / 3].map((a) => (
+          <mesh key={a} position={[Math.cos(a) * 0.5, 0.16, Math.sin(a) * 0.5]} rotation={[0, -a, 0.9]}>
+            <cylinderGeometry args={[0.012, 0.045, 1.05, 5]} />
+            <primitive attach="material" object={sprayMat} />
+          </mesh>
+        ))}
+      </group>
     </group>
   )
 }
@@ -211,10 +225,10 @@ export function Garden() {
       <GardenLamp x={-6.8} z={-9.6} />
       <GardenLamp x={8.4} z={9.8} />
 
-      <Sprinkler x={-9} z={-14} />
-      <Sprinkler x={9} z={-17} />
-      <Sprinkler x={-2} z={-28} />
-      <Sprinkler x={13} z={-25} />
+      <Sprinkler phase={0} x={-9} z={-14} />
+      <Sprinkler phase={1.6} x={9} z={-17} />
+      <Sprinkler phase={3.1} x={-2} z={-28} />
+      <Sprinkler phase={4.7} x={13} z={-25} />
 
       {/* garden flower beds: along the back fence + near the benches */}
       <FlowerBed d={1.1} w={16} x={0} z={-32.6} />

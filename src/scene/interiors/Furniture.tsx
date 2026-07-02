@@ -1,6 +1,6 @@
 import { Clone, useGLTF } from '@react-three/drei'
 import { FLOOR_TOP } from '../constants'
-import { useCutaway } from '../house/CutawayController'
+import { ExplodeGroup, offsetFor, useCutaway, useFloorOffsets } from '../house/CutawayController'
 import type { FloorId } from '../../types'
 
 type SetPlacement = {
@@ -41,12 +41,17 @@ function FurnitureSet({ url, floor, position, scale = 1 }: SetPlacement) {
 
 export function Furniture() {
   const { hiddenFloors } = useCutaway()
+  const offsets = useFloorOffsets()
   return (
     <group>
       {SETS.map((set, index) => (
-        <group key={`${set.url}-${index}`} visible={!hiddenFloors.has(set.floor)}>
+        <ExplodeGroup
+          key={`${set.url}-${index}`}
+          target={offsetFor(offsets, set.floor)}
+          visible={!hiddenFloors.has(set.floor)}
+        >
           <FurnitureSet {...set} />
-        </group>
+        </ExplodeGroup>
       ))}
     </group>
   )

@@ -3,6 +3,7 @@ import { Environs } from './environment/Environment'
 import { Garden } from './environment/Garden'
 import { Ground } from './environment/Ground'
 import { Skyline } from './environment/Skyline'
+import { EnergyFlow } from './effects/EnergyFlow'
 import { Garage } from './house/Garage'
 import { HouseShell } from './house/HouseShell'
 import { Terrace } from './house/Terrace'
@@ -36,6 +37,7 @@ export function SmartHomeWorld() {
         <Garage />
         <Terrace />
         <Furniture />
+        <EnergyFlow />
       </group>
     </>
   )
