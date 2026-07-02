@@ -65,6 +65,12 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
   dismissIntro: () => set({ introDismissed: true }),
 }))
 
+// Dev-only debug handle: lets agents drive scenes from the browser console /
+// eval-based screenshot tooling (Agent B extension, see HANDOFF 0.2b).
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  ;(window as unknown as Record<string, unknown>).__smartHomeStore = usePresentationStore
+}
+
 export const selectCurrentScene = (state: PresentationState) =>
   state.scenes[state.currentSceneIndex] ?? state.scenes[0]
 
