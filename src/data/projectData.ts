@@ -16,9 +16,8 @@ export const PROJECT = {
   garageAccesses: 3,
 }
 
-/** Team & Verantwortungsbereiche (PSP / Arbeitspakete, Stand 08.05.2026). */
+/** Team & Verantwortungsbereiche (PSP / Arbeitspakete; A. Abdulai hat das Team verlassen). */
 export const TEAM = [
-  { name: 'Adrian Abdulai', area: 'Projektleitung & Koordination' },
   { name: 'Ali Al-Toki', area: 'Beleuchtung' },
   { name: 'Amir Salehi', area: 'Klima & Energie' },
   { name: 'Soukaina Rhanimi', area: 'Steuerung & Interface · Protokoll' },
@@ -28,7 +27,7 @@ export const TEAM = [
 
 /** PSP-Hauptknoten mit Verantwortlichen — gezeigt im Menü. */
 export const WORK_PACKAGES = [
-  'AP 1 · Projektmanagement — A. Abdulai',
+  'AP 1 · Projektmanagement — Team',
   'AP 2.1 · Beleuchtung — A. Al-Toki',
   'AP 2.2 · Klima & Energie — A. Salehi',
   'AP 2.3 · Steuerung & Interface — S. Rhanimi',
