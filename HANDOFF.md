@@ -1,5 +1,21 @@
 # Handoff
 
+## 2026-07-03 - Claude - 0.6: real WBS/team from PM docs + cantilevered balcony
+
+What changed:
+- **Echte Arbeitspakete & Team** aus den PM-Dokumenten (PSP, Arbeitspakete je Mitglied, Meilensteine, Zieldreieck — Telegram-Ordner):
+  - `data/projectData.ts`: `TEAM` (6 Mitglieder mit Verantwortungsbereichen) + `WORK_PACKAGES` (PSP-Knoten mit Verantwortlichen).
+  - Szenen-Tags in `data/scenes.ts` auf echte PSP-Knoten umgestellt: AP 1 Projektmanagement · AP 2.1 Beleuchtung (Al-Toki) · AP 2.2 Klima & Energie (Salehi) · AP 2.3 Steuerung & Interface (Rhanimi) · AP 2.4 Sicherheit (Garcia Gomes) · AP 2.5 Datenschutz & IT-Sicherheit (Kulahin) · AP 3.4 Automatisierung · AP 5 Präsentation.
+  - Menü: Team-Liste + Credit „3D-Konzept · Visualisierung · Entwicklung: Vladyslav Kulahin“; AP-Liste mit Verantwortlichen; Panel scrollt bei Bedarf (max-height).
+- **Balkon nach draußen** (Vlads Feedback „заехал в здание“): Kragarm-Balkon VOR der Fassade über dem Eingang (z 5.5→7.9), Glasgeländer an allen drei offenen Seiten, zwei schlanke Stützen rahmen die Haustür (Balkon = Vordach). Rides og1 in der Explosionsansicht.
+
+Docs noted: Meilensteine M1–M8 (Abschluss 10.07.2026), Zieldreieck (Energieeinsparung ≥10 %, Budget 3–5 k€, 180 Personenstunden) — falls gewünscht, können diese in die Summary-Szene (Metriken/Panel) einfließen.
+Vlad passt Konfigurator-abhängige Doku selbst an (mobil).
+
+How to test: Menü (Team + AP), AP-Chips je Szene, Szene 9/2 (Balkon außen, Stützen am Eingang). `npm run build` passes.
+
+---
+
 ## 2026-07-02 - Claude - 0.5: exploded view, energy flow, focus staging, menu & HUD polish
 
 What changed:

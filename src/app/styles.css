@@ -183,7 +183,9 @@ button {
   position: absolute;
   top: 44px;
   right: 0;
-  width: 264px;
+  width: 300px;
+  max-height: calc(100vh - 130px);
+  overflow: auto;
   padding: 12px 14px;
   border-radius: var(--radius);
   text-align: left;
@@ -248,6 +250,19 @@ button {
   border-radius: 999px;
   background: var(--blue);
   vertical-align: 1px;
+}
+
+.menuList.team {
+  margin: 6px 0;
+}
+
+.menuList.team b {
+  color: #e6f1fc;
+  font-weight: 700;
+}
+
+.menuList.team li::before {
+  background: rgba(146, 166, 188, 0.7);
 }
 
 .stepper {

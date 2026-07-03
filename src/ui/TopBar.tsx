@@ -1,17 +1,7 @@
 import { Clock, Home, Keyboard, Layers, Menu, Sun, Users, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { PROJECT } from '../data/projectData'
+import { PROJECT, TEAM, WORK_PACKAGES } from '../data/projectData'
 import { SceneStepper } from './SceneStepper'
-
-/** Arbeitspakete summary (PM-Kurs WBS — Nummern/Namen ggf. ans Team anpassen). */
-const WORK_PACKAGES = [
-  'AP 1 · Projektüberblick & Management',
-  'AP 3 · Netzwerk & Infrastruktur',
-  'AP 4 · Sicherheit & Zutritt',
-  'AP 5 · Komfort & Medien',
-  'AP 6 · Garten & Außenbereich',
-  'AP 7 · Energie & PV',
-]
 
 export function TopBar() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -66,19 +56,27 @@ export function TopBar() {
           <div className="menuPanel glass">
             <div className="menuSection">
               <h3 className="menuTitle">
-                <Users size={13} /> Projekt & Credits
+                <Users size={13} /> Projekt & Team
               </h3>
               <p className="menuLine strong">{PROJECT.group}</p>
-              <p className="menuLine">{PROJECT.institution}</p>
-              <p className="menuLine">Betreuung: {PROJECT.client}</p>
+              <p className="menuLine">
+                {PROJECT.institution} · Betreuung: {PROJECT.client}
+              </p>
+              <ul className="menuList team">
+                {TEAM.map((member) => (
+                  <li key={member.name}>
+                    <b>{member.name}</b> — {member.area}
+                  </li>
+                ))}
+              </ul>
               <p className="menuLine credits">
-                Konzept · Visualisierung · Entwicklung: <b>Vlad</b>
+                3D-Konzept · Visualisierung · Entwicklung: <b>Vladyslav Kulahin</b>
               </p>
               <p className="menuLine dim">3D-Showcase: React Three Fiber / Three.js</p>
             </div>
             <div className="menuSection">
               <h3 className="menuTitle">
-                <Layers size={13} /> Arbeitspakete
+                <Layers size={13} /> Arbeitspakete (PSP)
               </h3>
               <ul className="menuList">
                 {WORK_PACKAGES.map((wp) => (
