@@ -1,5 +1,14 @@
 # Handoff
 
+## 2026-07-03 - Claude - DEPLOY: site live on GitHub Pages
+
+- **Live URL: https://godlanm228.github.io/smart-home-3d/** (public site; source repo stays private — GitHub Pro allows Pages from private repos).
+- Auto-deploy: `.github/workflows/deploy.yml` — every push to `master` builds (`npm run build -- --base=/smart-home-3d/`) and publishes. Push from the cloud/phone session → site updates itself in ~2 min.
+- `src/utils/assetUrl.ts`: all `/models/*` + `/textures/*` references now go through `assetUrl()` (BASE_URL-aware) so the app works at domain root (dev/Vercel) AND under the Pages sub-path. Verified live: index 200, GLB/textures 200, dev unchanged.
+- Team update: A. Abdulai removed (left the team), AP 1 → Team.
+
+---
+
 ## 2026-07-03 - Claude - 0.6: real WBS/team from PM docs + cantilevered balcony
 
 What changed:
