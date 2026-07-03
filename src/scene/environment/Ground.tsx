@@ -2,6 +2,7 @@ import { useTexture } from '@react-three/drei'
 import { useMemo } from 'react'
 import * as THREE from 'three'
 import { CanvasLabel } from '../CanvasLabel'
+import { assetUrl } from '../../utils/assetUrl'
 
 /** Plot layout: the house sits at the FRONT of the plot (street side, +Z),
  *  the big garden stretches behind it (-Z). Fence line = PLOT bounds. */
@@ -85,10 +86,10 @@ const GARDEN_PATH: Array<[number, number, number]> = Array.from({ length: 11 }, 
  */
 export function Ground() {
   const [diff, nor, rough, concrete] = useTexture([
-    '/textures/grass_diff.jpg',
-    '/textures/grass_nor.jpg',
-    '/textures/grass_rough.jpg',
-    '/textures/concrete.jpg',
+    assetUrl('/textures/grass_diff.jpg'),
+    assetUrl('/textures/grass_nor.jpg'),
+    assetUrl('/textures/grass_rough.jpg'),
+    assetUrl('/textures/concrete.jpg'),
   ])
 
   const { grassMat, concreteMat, paveMat, retainingMat, stoneMat } = useMemo(() => {

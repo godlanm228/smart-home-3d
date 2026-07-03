@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { FlowerBed, PLOT } from './Ground'
+import { assetUrl } from '../../utils/assetUrl'
 
 const postMat = new THREE.MeshStandardMaterial({ color: '#23282f', roughness: 0.6, metalness: 0.5 })
 const slatMat = new THREE.MeshStandardMaterial({ color: '#7a5f42', roughness: 0.75 })
@@ -193,7 +194,7 @@ function GrassTufts() {
  * security-camera poles.
  */
 export function Garden() {
-  const { scene: tree } = useGLTF('/models/tree1.glb')
+  const { scene: tree } = useGLTF(assetUrl('/models/tree1.glb'))
   const F = PLOT.zFront
   const B = PLOT.zBack
   const X = PLOT.x
@@ -245,4 +246,4 @@ export function Garden() {
   )
 }
 
-useGLTF.preload('/models/tree1.glb')
+useGLTF.preload(assetUrl('/models/tree1.glb'))

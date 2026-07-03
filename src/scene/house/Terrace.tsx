@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { CanvasLabel } from '../CanvasLabel'
 import { FLOOR_TOP, HD } from '../constants'
 import { railGlassMat, railMetalMat } from '../materials'
+import { assetUrl } from '../../utils/assetUrl'
 
 const DECK_W = 9
 const DECK_D = 4
@@ -13,8 +14,8 @@ const DECK_TOP = FLOOR_TOP.eg
 
 /** Wooden garden deck flush with the EG floor + patio furniture set. */
 export function Terrace() {
-  const wood = useTexture('/textures/wood.jpg')
-  const { scene: patio } = useGLTF('/models/patio.glb')
+  const wood = useTexture(assetUrl('/textures/wood.jpg'))
+  const { scene: patio } = useGLTF(assetUrl('/models/patio.glb'))
 
   const deckMat = useMemo(() => {
     const t = wood.clone()
@@ -71,4 +72,4 @@ export function Terrace() {
   )
 }
 
-useGLTF.preload('/models/patio.glb')
+useGLTF.preload(assetUrl('/models/patio.glb'))

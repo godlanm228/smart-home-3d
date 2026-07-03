@@ -5,6 +5,7 @@ import { CanvasLabel } from '../CanvasLabel'
 import { EAVES_Y, HD, HOUSE_D, HOUSE_W, HW, RIDGE_Y, ROOF_H, SLAB_T } from '../constants'
 import { glassMat } from '../materials'
 import { ExplodeGroup, useCutaway, useFloorOffsets } from './CutawayController'
+import { assetUrl } from '../../utils/assetUrl'
 
 const OVERHANG = 0.3
 const RW = HW + OVERHANG
@@ -71,9 +72,9 @@ export function Roof() {
   const { roofHidden, atticHidden } = useCutaway()
   const offsets = useFloorOffsets()
   const [diff, nor, rough] = useTexture([
-    '/textures/roof_diff.jpg',
-    '/textures/roof_nor.jpg',
-    '/textures/roof_rough.jpg',
+    assetUrl('/textures/roof_diff.jpg'),
+    assetUrl('/textures/roof_nor.jpg'),
+    assetUrl('/textures/roof_rough.jpg'),
   ])
 
   const roofMat = useMemo(() => {

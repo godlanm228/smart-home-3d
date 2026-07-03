@@ -7,6 +7,7 @@ import { Balcony } from './Balcony'
 import { FloorStack } from './FloorStack'
 import { Roof } from './Roof'
 import { Stairs } from './Stairs'
+import { assetUrl } from '../../utils/assetUrl'
 
 const doorMat = new THREE.MeshStandardMaterial({ color: '#3a2f24', roughness: 0.5 })
 const handleMat = new THREE.MeshStandardMaterial({ color: '#cfd6dd', roughness: 0.3 })
@@ -42,7 +43,7 @@ function Entrance() {
  * loggia and stairs. Warm interior lights make the house glow at dusk.
  */
 export function HouseShell() {
-  const concrete = useTexture('/textures/concrete.jpg')
+  const concrete = useTexture(assetUrl('/textures/concrete.jpg'))
 
   const plinthMat = useMemo(() => {
     const t = concrete.clone()

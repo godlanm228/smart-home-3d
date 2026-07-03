@@ -16,6 +16,7 @@ import {
 } from '../constants'
 import { glassMat, partitionFrameMat } from '../materials'
 import { ExplodeGroup, useCutaway, useFloorOffsets } from './CutawayController'
+import { assetUrl } from '../../utils/assetUrl'
 
 type StoreyId = keyof typeof FLOOR_BASE
 
@@ -109,7 +110,7 @@ function Partition({ x, base }: { x: number; base: number }) {
 export function FloorStack() {
   const { hiddenFloors } = useCutaway()
   const offsets = useFloorOffsets()
-  const wood = useTexture('/textures/wood.jpg')
+  const wood = useTexture(assetUrl('/textures/wood.jpg'))
 
   const woodMat = useMemo(() => {
     const t = wood.clone()

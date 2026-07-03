@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { CanvasLabel } from '../CanvasLabel'
 import { GARAGE_D, GARAGE_H, GARAGE_W, GARAGE_X, GARAGE_Z } from '../constants'
 import { darkTrimMat } from '../materials'
+import { assetUrl } from '../../utils/assetUrl'
 
 const FLOOR_TOP = 0.1
 
@@ -39,8 +40,8 @@ function Car({ url, x, z, rotY = 0 }: { url: string; x: number; z: number; rotY?
   )
 }
 
-useGLTF.preload('/models/car.glb')
-useGLTF.preload('/models/car2.glb')
+useGLTF.preload(assetUrl('/models/car.glb'))
+useGLTF.preload(assetUrl('/models/car2.glb'))
 
 /** Attached double garage: 2 sectional doors to the street, 3 pedestrian passages. */
 export function Garage() {
