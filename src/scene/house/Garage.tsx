@@ -103,8 +103,8 @@ export function Garage() {
         <boxGeometry args={[1.0, 2.1, 0.16]} />
         <primitive attach="material" object={passageMat} />
       </mesh>
-      <Car url="/models/car.glb" x={-1.95} z={0.4} />
-      <Car rotY={Math.PI} url="/models/car2.glb" x={1.95} z={-0.6} />
+      <Car url={assetUrl('/models/car.glb')} x={-1.95} z={0.4} />
+      <Car rotY={Math.PI} url={assetUrl('/models/car2.glb')} x={1.95} z={-0.6} />
       <CanvasLabel color="#dce8f6" position={[0, FLOOR_TOP + GARAGE_H + 0.7, 0]} scale={1.9} text="GARAGE" />
     </group>
   )

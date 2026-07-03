@@ -1,6 +1,24 @@
 import { Canvas } from '@react-three/fiber'
-import { Suspense } from 'react'
+import { Component, Suspense, type ReactNode } from 'react'
 import { Experience } from './Experience'
+
+/** One failed asset must never blank the whole presentation: the HUD keeps
+ *  running and the error lands in the console instead of an empty page. */
+class SceneErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false }
+
+  static getDerivedStateFromError() {
+    return { failed: true }
+  }
+
+  componentDidCatch(error: unknown) {
+    console.error('[SceneCanvas] 3D scene crashed:', error)
+  }
+
+  render() {
+    return this.state.failed ? null : this.props.children
+  }
+}
 
 export function SceneCanvas() {
   return (
@@ -13,9 +31,11 @@ export function SceneCanvas() {
       }}
       dpr={[1, 1.8]}
     >
-      <Suspense fallback={null}>
-        <Experience />
-      </Suspense>
+      <SceneErrorBoundary>
+        <Suspense fallback={null}>
+          <Experience />
+        </Suspense>
+      </SceneErrorBoundary>
     </Canvas>
   )
 }
