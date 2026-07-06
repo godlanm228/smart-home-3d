@@ -5,6 +5,7 @@ import * as THREE from 'three'
 import { selectCurrentScene, usePresentationStore } from '../../store/usePresentationStore'
 import type { DeviceInfo } from '../../types'
 import { offsetFor, useFloorOffsets } from '../house/CutawayController'
+import { DeviceCallout } from './DeviceCallout'
 import { DeviceModel, useAccentMaterial } from './DeviceModel'
 
 type DeviceMarkerProps = {
@@ -138,6 +139,17 @@ export function DeviceMarker({ device, focused, hovered, selected }: DeviceMarke
       </group>
 
       {coneDelta && !dimmed ? <ViewCone color={device.glowColor ?? '#39a9ff'} delta={coneDelta} strength={strength} /> : null}
+
+      {/* Demo auto-callout: key devices label themselves once the camera settles. */}
+      {focused ? (
+        <DeviceCallout
+          device={device}
+          hidden={hovered || selected}
+          index={scene.focusDeviceIds?.indexOf(device.id) ?? 0}
+          sceneId={scene.id}
+          settleMs={(scene.camera.duration ?? 1) * 1000 + 450}
+        />
+      ) : null}
 
       {hovered && !selected ? (
         <Html center distanceFactor={11} position={[0, 0.6, 0]} zIndexRange={[2, 1]}>

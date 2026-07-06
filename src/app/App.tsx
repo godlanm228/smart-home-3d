@@ -18,5 +18,25 @@ export function App() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [nextScene, previousScene, selectDevice])
 
+  // Deep-linking: ?scene=N jumps straight to a scene (intro dismissed) and the
+  // URL keeps tracking navigation — direct links, reload-safe demo, screenshots.
+  useEffect(() => {
+    const store = usePresentationStore
+    const raw = new URLSearchParams(window.location.search).get('scene')
+    if (raw) {
+      const n = Number.parseInt(raw, 10)
+      if (Number.isFinite(n) && n >= 1 && n <= store.getState().scenes.length) {
+        store.getState().setSceneByIndex(n - 1)
+        store.getState().dismissIntro()
+      }
+    }
+    return store.subscribe((state, prev) => {
+      if (state.currentSceneIndex === prev.currentSceneIndex) return
+      const url = new URL(window.location.href)
+      url.searchParams.set('scene', String(state.currentSceneIndex + 1))
+      window.history.replaceState(null, '', url)
+    })
+  }, [])
+
   return <Layout />
 }

@@ -1,6 +1,8 @@
 import { useGLTF } from '@react-three/drei'
-import { useMemo } from 'react'
+import { useFrame } from '@react-three/fiber'
+import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
+import { usePresentationStore } from '../../store/usePresentationStore'
 import { CanvasLabel } from '../CanvasLabel'
 import { GARAGE_D, GARAGE_H, GARAGE_W, GARAGE_X, GARAGE_Z } from '../constants'
 import { darkTrimMat } from '../materials'
@@ -43,6 +45,87 @@ function Car({ url, x, z, rotY = 0 }: { url: string; x: number; z: number; rotY?
 useGLTF.preload(assetUrl('/models/car.glb'))
 useGLTF.preload(assetUrl('/models/car2.glb'))
 
+const DOOR_H = 2.5
+
+/** Sectional door that swings up under the ceiling when the garage scene is
+ *  active (staggered per side) — the demo shows cars + wallbox hands-free. */
+function SectionalDoor({ side, frontZ, delaySec }: { side: 1 | -1; frontZ: number; delaySec: number }) {
+  const pivotRef = useRef<THREE.Group>(null)
+  const progress = useRef(0)
+  const openSince = useRef<number | null>(null)
+  const open = usePresentationStore((state) => state.scenes[state.currentSceneIndex].id === 'garage')
+
+  useFrame(({ clock }, delta) => {
+    if (open) {
+      if (openSince.current === null) openSince.current = clock.elapsedTime
+    } else {
+      openSince.current = null
+    }
+    const past = open && openSince.current !== null && clock.elapsedTime - openSince.current > delaySec
+    progress.current = THREE.MathUtils.damp(progress.current, past ? 1 : 0, 2.1, delta)
+    // positive X-rotation swings the panel inward, up under the garage ceiling
+    if (pivotRef.current) pivotRef.current.rotation.x = progress.current * 1.42
+  })
+
+  return (
+    <group position={[side * 1.95, FLOOR_TOP + DOOR_H, frontZ]} ref={pivotRef}>
+      <mesh castShadow position={[0, -DOOR_H / 2, 0]}>
+        <boxGeometry args={[3.3, DOOR_H, 0.12]} />
+        <primitive attach="material" object={doorMat} />
+      </mesh>
+      {[1, 2, 3, 4].map((line) => (
+        <mesh key={line} position={[0, (DOOR_H * line) / 5 - DOOR_H, 0.02]}>
+          <boxGeometry args={[3.3, 0.05, 0.14]} />
+          <primitive attach="material" object={panelMat} />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
+/** Flat roof that lifts away and fades on the garage scene, so the camera can
+ *  look inside: two cars, doors under the ceiling, passages. */
+function GarageRoof() {
+  const roofRef = useRef<THREE.Mesh>(null)
+  const progress = useRef(0)
+  const open = usePresentationStore((state) => state.scenes[state.currentSceneIndex].id === 'garage')
+  const material = useMemo(() => {
+    const mat = (darkTrimMat as THREE.MeshStandardMaterial).clone()
+    mat.transparent = true
+    return mat
+  }, [])
+
+  useFrame((_, delta) => {
+    progress.current = THREE.MathUtils.damp(progress.current, open ? 1 : 0, 2.0, delta)
+    const roof = roofRef.current
+    if (!roof) return
+    roof.position.y = FLOOR_TOP + GARAGE_H + progress.current * 2.4
+    material.opacity = 1 - progress.current
+    roof.visible = material.opacity > 0.02
+  })
+
+  return (
+    <mesh castShadow position={[0, FLOOR_TOP + GARAGE_H, 0]} ref={roofRef}>
+      <boxGeometry args={[GARAGE_W + 0.5, 0.18, GARAGE_D + 0.5]} />
+      <primitive attach="material" object={material} />
+    </mesh>
+  )
+}
+
+/** Warm interior light that fades in with the garage scene (roof is lifted). */
+function GarageInnerLight() {
+  const lightRef = useRef<THREE.PointLight>(null)
+  const progress = useRef(0)
+  const open = usePresentationStore((state) => state.scenes[state.currentSceneIndex].id === 'garage')
+
+  useFrame((_, delta) => {
+    progress.current = THREE.MathUtils.damp(progress.current, open ? 1 : 0, 2.0, delta)
+    if (lightRef.current) lightRef.current.intensity = progress.current * 14
+  })
+
+  return <pointLight color="#ffd9a0" distance={9} intensity={0} position={[0, 2.3, 0]} ref={lightRef} />
+}
+
 /** Attached double garage: 2 sectional doors to the street, 3 pedestrian passages. */
 export function Garage() {
   const wallY = FLOOR_TOP + GARAGE_H / 2
@@ -67,29 +150,15 @@ export function Garage() {
         <boxGeometry args={[GARAGE_W, GARAGE_H, 0.2]} />
         <primitive attach="material" object={wallMat} />
       </mesh>
-      {/* two sectional doors to the street (+Z) + centre pillar */}
-      {[-1, 1].map((s) => (
-        <group key={s}>
-          <mesh castShadow position={[s * 1.95, FLOOR_TOP + 1.25, frontZ]}>
-            <boxGeometry args={[3.3, 2.5, 0.12]} />
-            <primitive attach="material" object={doorMat} />
-          </mesh>
-          {[1, 2, 3, 4].map((line) => (
-            <mesh key={line} position={[s * 1.95, FLOOR_TOP + (2.5 * line) / 5, frontZ + 0.02]}>
-              <boxGeometry args={[3.3, 0.05, 0.14]} />
-              <primitive attach="material" object={panelMat} />
-            </mesh>
-          ))}
-        </group>
-      ))}
+      {/* two sectional doors to the street (+Z) + centre pillar — animated */}
+      <SectionalDoor delaySec={0.15} frontZ={frontZ} side={1} />
+      <SectionalDoor delaySec={0.55} frontZ={frontZ} side={-1} />
       <mesh castShadow position={[0, wallY, frontZ]}>
         <boxGeometry args={[0.5, GARAGE_H, 0.5]} />
         <primitive attach="material" object={wallMat} />
       </mesh>
-      <mesh castShadow position={[0, FLOOR_TOP + GARAGE_H, 0]}>
-        <boxGeometry args={[GARAGE_W + 0.5, 0.18, GARAGE_D + 0.5]} />
-        <primitive attach="material" object={darkTrimMat} />
-      </mesh>
+      <GarageRoof />
+      <GarageInnerLight />
       {/* 3 pedestrian passages: house / garden / front */}
       <mesh position={[-GARAGE_W / 2 + 0.02, FLOOR_TOP + 1.05, -2.6]}>
         <boxGeometry args={[0.16, 2.1, 1.0]} />

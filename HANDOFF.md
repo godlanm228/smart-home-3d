@@ -1,5 +1,19 @@
 # Handoff
 
+## 2026-07-07 - Claude - 0.7: Demo-Modus (Vlads Feedback für die Abschlusspräsentation 10.07.)
+
+What changed:
+- **Clean intro** (`PresentationScene.hud: 'clean'`, Szene 1): kompletter HUD + alle Device-Marker/Cones ausgeblendet — nur das Haus. Dezenter Hint unten („Smart Home · Gruppe 7 — Pfeiltaste →“, `.cleanHint`). Layout blendet zentral aus; `InteractionLayer` returned null.
+- **Auto-Callouts** (`scene/devices/DeviceCallout.tsx`): Fokus-Geräte jeder Szene beschriften sich selbst, sobald die Kamera steht (settle = camera.duration + 450 ms, Stagger 340 ms/Callout) — Glaspanel (Label + Benefit) + Leader-Line, Richtungen zyklisch aus `DIRECTIONS`, keine Maus nötig. Bei Hover/Select blendet das Callout aus (CSS `.isHidden`), Timer läuft nur je Szenenwechsel.
+- **Garage öffnet sich** (Szene 3): Sektionaltore schwenken gestaffelt nach innen unter die Decke (`SectionalDoor`, damp + rotation.x), Flachdach hebt ab & blendet aus (`GarageRoof`, geklontes darkTrim-Material), warmes Innenlicht faded ein (`GarageInnerLight`) → beide GLB-Autos + Wallbox sichtbar.
+- **Deep-Links**: `?scene=N` (1–14) springt direkt in die Szene (Intro dismissed) und die URL trackt die Navigation via `replaceState` — reload-sicheres Demo + reproduzierbare Screenshots (App.tsx).
+
+How to test: `npm run dev` → `/?scene=1` (clean), `?scene=3` (Tore/Dach/Autos), `?scene=13` (6 Callouts), Hover über ein Callout-Gerät (Callout weicht dem Tooltip). `npm run build` + `tsc --noEmit` passieren.
+
+Known issues: Bei Szene 13 können sich einzelne Callouts berühren (6 Geräte, weite Kamera) — bewusst toleriert; Richtungswahl ist zyklisch, nicht kollisions-aware.
+
+---
+
 ## 2026-07-03 - Claude - DEPLOY: site live on GitHub Pages
 
 - **Live URL: https://godlanm228.github.io/smart-home-3d/** (public site; source repo stays private — GitHub Pro allows Pages from private repos).

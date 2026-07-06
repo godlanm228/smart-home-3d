@@ -7,6 +7,9 @@ export function InteractionLayer() {
   const hoveredDeviceId = usePresentationStore((state) => state.hoveredDeviceId)
   const selectedDeviceId = usePresentationStore((state) => state.selectedDeviceId)
 
+  // Clean intro scene: pure house visual, no markers/cones/callouts.
+  if (scene.hud === 'clean') return null
+
   return (
     <group>
       {devices.map((device) => (

@@ -7,7 +7,7 @@ export const SCENES: PresentationScene[] = [
     camera: { position: [27, 18, 40], target: [0, 3, -3], fov: 42, duration: 1.35 },
     description: 'Gesamtüberblick: Einfamilienhaus (~180 m²) mit Garten, Vorgarten, Garage, PV und Sicherheitszonen. Das Grundstück steht im Licht, die Stadt verschwimmt im Nebel.',
     focusDeviceIds: ['pv-roof', 'outdoor-camera', 'wallbox', 'garden-camera-1'],
-    visibleFloorIds: ['keller', 'eg', 'og1', 'dachgeschoss', 'dachboden', 'garage', 'roof'], cutawayMode: 'none' },
+    visibleFloorIds: ['keller', 'eg', 'og1', 'dachgeschoss', 'dachboden', 'garage', 'roof'], cutawayMode: 'none', hud: 'clean' },
   { id: 'entrance', index: 2, workPackage: 'AP 2.4 · Sicherheit', title: 'Eingang & Vorgarten', subtitle: 'Zutritt, Türklingel, Kamera', floor: 'outdoor',
     camera: { position: [11, 5, 22], target: [6.2, 1.8, 5.5], fov: 38, duration: 1.1 },
     description: 'Schlüsselloser Zutritt per Smart Lock (Premium: Fingerprint), Video-Türklingel und Tür-/Fenstersensoren an allen EG-Zugängen. Die Kamera erkennt Annäherung schon am Tor.',
