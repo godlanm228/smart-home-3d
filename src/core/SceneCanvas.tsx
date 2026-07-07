@@ -20,6 +20,9 @@ class SceneErrorBoundary extends Component<{ children: ReactNode }, { failed: bo
   }
 }
 
+const COARSE_POINTER =
+  typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
+
 export function SceneCanvas() {
   return (
     <Canvas
@@ -29,7 +32,7 @@ export function SceneCanvas() {
         antialias: true,
         powerPreference: 'high-performance',
       }}
-      dpr={[1, 1.8]}
+      dpr={COARSE_POINTER ? [1, 1.5] : [1, 1.8]}
     >
       <SceneErrorBoundary>
         <Suspense fallback={null}>

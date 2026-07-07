@@ -1,6 +1,12 @@
 import { Bloom, EffectComposer, Vignette } from '@react-three/postprocessing'
 
+/** Post-processing is a real GPU cost on phones — skip it there entirely.
+ *  Desktop (fine pointer) keeps the tuned Bloom/Vignette look. */
+const COARSE_POINTER =
+  typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
+
 export function PostFX() {
+  if (COARSE_POINTER) return null
   return (
     <EffectComposer multisampling={0}>
       {/* Threshold raised so only emissives (markers, windows, LEDs) bloom —

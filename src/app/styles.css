@@ -840,6 +840,73 @@ button {
   }
 }
 
+/* ---------- edge navigation (touch) ---------- */
+
+.edgeNav {
+  position: absolute;
+  top: 50%;
+  z-index: 6;
+  display: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  align-items: center;
+  justify-content: center;
+  color: #f0f8ff;
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0 0 4px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.edgeNavLeft {
+  left: calc(10px + env(safe-area-inset-left, 0px));
+}
+
+.edgeNavRight {
+  right: calc(10px + env(safe-area-inset-right, 0px));
+}
+
+.edgeNav:active {
+  background: rgba(57, 169, 255, 0.28);
+}
+
+.hintTouch {
+  display: none;
+}
+
+@media (pointer: coarse), (max-width: 900px) {
+  .edgeNav {
+    display: flex;
+  }
+
+  .hintDesktop {
+    display: none;
+  }
+
+  .hintTouch {
+    display: inline;
+  }
+
+  .deviceCallout {
+    min-width: 118px;
+    max-width: 158px;
+    padding: 7px 9px;
+    gap: 2px;
+  }
+
+  .calloutTitle {
+    font-size: 10.5px;
+  }
+
+  .calloutText {
+    font-size: 9px;
+  }
+}
+
 /* ---------- start overlay ---------- */
 
 .startOverlay {
@@ -963,16 +1030,51 @@ button {
 
 @media (max-width: 560px) {
   .topBar {
-    align-items: start;
-    grid-template-columns: 1fr;
-    gap: 8px;
+    top: calc(8px + env(safe-area-inset-top, 0px));
+    align-items: center;
+    grid-template-columns: auto;
+    justify-content: center;
+    gap: 6px;
+    min-height: 0;
+    padding: 5px 10px;
+  }
+
+  .brand {
+    display: none;
   }
 
   .stepper {
     justify-self: center;
   }
 
-  .sceneInfo {
+  /* Auf dem Handy ist die Szenen-Erzählung wichtiger als das Metrik-Dock. */
+  .metricsDock {
     display: none;
+  }
+
+  .sceneInfo {
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    left: 12px;
+    width: auto;
+    max-width: none;
+    padding: 10px 12px;
+  }
+
+  .sceneInfoText {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .cleanHint {
+    right: 12px;
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    left: 12px;
+    transform: none;
+    justify-content: center;
+    font-size: 12px;
+    text-align: center;
   }
 }

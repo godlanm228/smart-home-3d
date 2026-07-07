@@ -1,5 +1,18 @@
 # Handoff
 
+## 2026-07-07 - Claude - 0.8: Mobile-Modus (QR-Besucher auf Handys)
+
+What changed:
+- **EdgeNav** (`ui/EdgeNav.tsx`): große ‹ ›-Buttons an den Bildschirmrändern, safe-area-aware, nur auf Touch/schmalen Screens sichtbar (`@media (pointer: coarse), (max-width: 900px)`); auch in der Clean-Szene 1 — Handy-Besucher stecken nicht mehr fest. Hint-Text wechselt per CSS („Pfeiltaste“ ↔ „Pfeil antippen“).
+- **Portrait-FOV** (`core/CameraRig.tsx`, `fovForAspect`): bei Aspect < 1.25 wird das vertikale FOV geboostet (max ×1.6, Cap 72°) — alle 14 Szenen passen ins Hochformat, ohne die 16:9-Kameraposen anzufassen; Resize triggert das Retuning.
+- **Leichter auf Handys**: PostFX (Bloom/Vignette) auf coarse pointern komplett aus; Canvas-DPR-Cap 1.5 (Desktop unverändert 1.8).
+- **Callouts kompakt**: auf Touch max. 3 pro Szene, Richtungs-Offsets ×0.75, kleinere Panels (CSS).
+- **Layout ≤560px**: Brand + MetricsDock ausgeblendet, Stepper zentriert schmal, SceneInfoCard volle Breite unten (Text 3-zeilig geklemmt) — die Erzählung bleibt, der Ballast geht; `viewport-fit=cover` + env(safe-area-inset-*).
+
+How to test: Chrome DevTools Device-Emulation (iPhone) → `/?scene=1` (Pfeil rechts, Hint), `?scene=3` (Haus passt, 3 Callouts, Info-Karte unten), Landscape ok; Desktop unverändert. `npm run build` passes.
+
+---
+
 ## 2026-07-07 - Claude - 0.7: Demo-Modus (Vlads Feedback für die Abschlusspräsentation 10.07.)
 
 What changed:

@@ -4,8 +4,17 @@ import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { selectCurrentScene, usePresentationStore } from '../store/usePresentationStore'
 
+/** Scene cameras are tuned for 16:9. On narrow (portrait) viewports we widen
+ *  the vertical FOV so the framing still fits — desktop stays untouched. */
+function fovForAspect(baseFov: number, aspect: number) {
+  if (aspect >= 1.25) return baseFov
+  const boost = Math.min(1.25 / Math.max(aspect, 0.4), 1.6)
+  return Math.min(baseFov * boost, 72)
+}
+
 export function CameraRig() {
   const camera = useThree((state) => state.camera as THREE.PerspectiveCamera)
+  const size = useThree((state) => state.size)
   const scene = usePresentationStore(selectCurrentScene)
   const target = useMemo(() => new THREE.Vector3(...scene.camera.target), [])
   const targetRef = useRef(target)
@@ -26,7 +35,7 @@ export function CameraRig() {
     })
 
     const fovTween = gsap.to(camera, {
-      fov: scene.camera.fov ?? 42,
+      fov: fovForAspect(scene.camera.fov ?? 42, size.width / size.height),
       duration,
       ease,
       onUpdate: () => camera.updateProjectionMatrix(),
@@ -49,7 +58,7 @@ export function CameraRig() {
       fovTween.kill()
       targetTween.kill()
     }
-  }, [camera, scene])
+  }, [camera, scene, size.width, size.height])
 
   useFrame(() => {
     camera.lookAt(targetRef.current)

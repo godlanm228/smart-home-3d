@@ -1,6 +1,7 @@
 import { SceneCanvas } from '../core/SceneCanvas'
 import { selectCurrentScene, usePresentationStore } from '../store/usePresentationStore'
 import { DeviceInfoPanel } from './DeviceInfoPanel'
+import { EdgeNav } from './EdgeNav'
 import { FloorSelector } from './FloorSelector'
 import { MetricsDock } from './MetricsDock'
 import { RoomCards } from './RoomCards'
@@ -29,9 +30,11 @@ export function Layout() {
             <RoomCards />
           </>
         )}
+        <EdgeNav />
         {clean && introDismissed ? (
           <div className="cleanHint glass">
-            Smart Home · Gruppe 7<span>Pfeiltaste → für den Rundgang</span>
+            Smart Home · Gruppe 7<span className="hintDesktop">Pfeiltaste → für den Rundgang</span>
+            <span className="hintTouch">Pfeil antippen → Rundgang</span>
           </div>
         ) : null}
         <StartOverlay />

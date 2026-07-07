@@ -13,6 +13,13 @@ const DIRECTIONS: [number, number, number][] = [
   [1.5, 0.55, -0.3],
 ]
 
+/** Phones: fewer + tighter callouts so the small screen stays readable. */
+const COMPACT =
+  typeof window !== 'undefined' &&
+  window.matchMedia('(pointer: coarse), (max-width: 900px)').matches
+const MAX_COMPACT_CALLOUTS = 3
+const COMPACT_DIR_SCALE = 0.75
+
 type DeviceCalloutProps = {
   device: DeviceInfo
   /** Position in the scene's focus list — drives direction + stagger. */
@@ -37,8 +44,12 @@ export function DeviceCallout({ device, index, sceneId, settleMs, hidden }: Devi
   }, [sceneId, settleMs, index])
 
   if (!ready) return null
+  if (COMPACT && index >= MAX_COMPACT_CALLOUTS) return null
 
-  const dir = DIRECTIONS[index % DIRECTIONS.length]
+  const base = DIRECTIONS[index % DIRECTIONS.length]
+  const dir: [number, number, number] = COMPACT
+    ? [base[0] * COMPACT_DIR_SCALE, base[1] * COMPACT_DIR_SCALE, base[2] * COMPACT_DIR_SCALE]
+    : base
 
   return (
     <group>
