@@ -15,9 +15,17 @@ function fovForAspect(baseFov: number, aspect: number) {
 export function CameraRig() {
   const camera = useThree((state) => state.camera as THREE.PerspectiveCamera)
   const size = useThree((state) => state.size)
+  const advance = useThree((state) => state.advance)
   const scene = usePresentationStore(selectCurrentScene)
   const target = useMemo(() => new THREE.Vector3(...scene.camera.target), [])
   const targetRef = useRef(target)
+
+  if (import.meta.env.DEV && typeof window !== 'undefined') {
+    const w = window as unknown as Record<string, unknown>
+    w.__camera = camera
+    w.__gsap = gsap
+    w.__advance = advance
+  }
 
   useEffect(() => {
     const from = targetRef.current
