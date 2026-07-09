@@ -73,4 +73,9 @@ export const SCENES: PresentationScene[] = [
     description: 'Finaler Überblick über das Smart-Home-Konzept der Gruppe 7 — Nutzen, Kostenstruktur (Basic/Standard/Premium) und modulare Erweiterbarkeit.',
     focusDeviceIds: ['pv-roof', 'smart-lock', 'server-rack', 'wallbox', 'garden-camera-1'],
     visibleFloorIds: ['keller', 'eg', 'og1', 'dachgeschoss', 'dachboden', 'garage', 'roof'], cutawayMode: 'none' },
+  { id: 'pitch', index: 15, workPackage: 'AP 5 · Präsentation', title: 'Warum dieses Konzept?', subtitle: 'Konkrete Zahlen statt Versprechen', floor: 'outdoor',
+    camera: { position: [-21, 9, 30], target: [1, 3.5, 0], fov: 42, duration: 1.4 },
+    description: 'Finale des Rundgangs: die wichtigsten Zahlen des Konzepts auf einen Blick — Einsparung, Sicherheit, Datenschutz, Kosten.',
+    focusDeviceIds: [],
+    visibleFloorIds: ['keller', 'eg', 'og1', 'dachgeschoss', 'dachboden', 'garage', 'roof'], cutawayMode: 'none', hud: 'pitch' },
 ]

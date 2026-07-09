@@ -37,8 +37,9 @@ export interface PresentationScene {
   cutawayMode?: 'none' | 'roof-off' | 'floor-focus' | 'exploded'
   /** Arbeitspaket tag (PM course WBS), e.g. "AP 4 · Sicherheit & Zutritt". */
   workPackage?: string
-  /** 'clean' hides the whole HUD + device markers — pure house visual (intro scene). */
-  hud?: 'full' | 'clean'
+  /** 'clean' hides the whole HUD + device markers — pure house visual (intro scene).
+   *  'pitch' hides the full HUD and shows the Vorteile tiles (finale scene). */
+  hud?: 'full' | 'clean' | 'pitch'
 }
 
 /** Visual body of a device marker — picks a procedural mini-model. */
