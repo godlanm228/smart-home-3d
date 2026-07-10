@@ -78,4 +78,9 @@ export const SCENES: PresentationScene[] = [
     description: 'Finale des Rundgangs: die wichtigsten Zahlen des Konzepts auf einen Blick — Einsparung, Sicherheit, Datenschutz, Kosten.',
     focusDeviceIds: [],
     visibleFloorIds: ['keller', 'eg', 'og1', 'dachgeschoss', 'dachboden', 'garage', 'roof'], cutawayMode: 'none', hud: 'pitch' },
+  { id: 'savings', index: 16, workPackage: 'AP 2.2 · Klima & Energie', title: 'Wie entsteht die Einsparung?', subtitle: 'Der Rechenweg hinter den Zahlen', floor: 'outdoor',
+    camera: { position: [24, 10, 31], target: [0, 3.5, 0], fov: 42, duration: 1.3 },
+    description: 'Die Mechanik hinter den Einsparzielen: Beleuchtung, Heizung und Grundlast — mit den Faustregeln und Zielwerten aus dem Pflichtenheft.',
+    focusDeviceIds: [],
+    visibleFloorIds: ['keller', 'eg', 'og1', 'dachgeschoss', 'dachboden', 'garage', 'roof'], cutawayMode: 'none', hud: 'savings' },
 ]

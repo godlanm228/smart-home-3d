@@ -6,6 +6,7 @@ import { FloorSelector } from './FloorSelector'
 import { MetricsDock } from './MetricsDock'
 import { PitchOverlay } from './PitchOverlay'
 import { RoomCards } from './RoomCards'
+import { SavingsOverlay } from './SavingsOverlay'
 import { SceneInfoCard } from './SceneInfoCard'
 import { StartOverlay } from './StartOverlay'
 import { TopBar } from './TopBar'
@@ -15,6 +16,7 @@ export function Layout() {
   const introDismissed = usePresentationStore((state) => state.introDismissed)
   const clean = scene.hud === 'clean'
   const pitch = scene.hud === 'pitch'
+  const savings = scene.hud === 'savings'
 
   return (
     <main className="experience">
@@ -22,7 +24,7 @@ export function Layout() {
         <SceneCanvas />
       </div>
       <div className="hud">
-        {clean || pitch ? null : (
+        {clean || pitch || savings ? null : (
           <>
             <TopBar />
             <FloorSelector />
@@ -33,6 +35,7 @@ export function Layout() {
           </>
         )}
         {pitch ? <PitchOverlay key={scene.id} /> : null}
+        {savings ? <SavingsOverlay key={scene.id} /> : null}
         <EdgeNav />
         {clean && introDismissed ? (
           <div className="cleanHint glass">

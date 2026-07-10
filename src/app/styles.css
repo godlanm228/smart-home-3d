@@ -1170,6 +1170,74 @@ button {
   }
 }
 
+/* savings breakdown (scene 16) */
+
+.savingsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  max-width: 1180px;
+}
+
+.savingsCard {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 15px 17px;
+  border-radius: 16px;
+  opacity: 0;
+  animation: pitchIn 0.65s cubic-bezier(0.2, 0.8, 0.25, 1) both;
+}
+
+.savingsTitle {
+  color: #8fd0ff;
+  font-size: 16px;
+  font-weight: 750;
+  letter-spacing: 0.01em;
+}
+
+.savingsLine {
+  position: relative;
+  padding-left: 14px;
+  color: var(--text);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.savingsLine::before {
+  content: '';
+  position: absolute;
+  top: 7px;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(143, 208, 255, 0.75);
+}
+
+.savingsGoal {
+  margin-top: 3px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  color: #9fc4ff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.savingsTotal {
+  max-width: 1180px;
+  padding: 11px 16px;
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 13px;
+  opacity: 0;
+  animation: pitchIn 0.6s ease-out both;
+}
+
+.savingsTotal b {
+  color: #8fd0ff;
+}
+
 @media (pointer: coarse), (max-width: 900px) {
   .pitchOverlay {
     justify-content: flex-end;
@@ -1209,5 +1277,42 @@ button {
 
   .pitchSrc {
     font-size: 10px;
+  }
+
+  .savingsGrid {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .savingsCard {
+    gap: 4px;
+    padding: 9px 11px;
+    border-radius: 12px;
+  }
+
+  .savingsTitle {
+    font-size: 13px;
+  }
+
+  .savingsLine {
+    padding-left: 11px;
+    font-size: 10.5px;
+    line-height: 1.35;
+  }
+
+  .savingsLine::before {
+    top: 5px;
+    width: 5px;
+    height: 5px;
+  }
+
+  .savingsGoal {
+    padding-top: 5px;
+    font-size: 10.5px;
+  }
+
+  .savingsTotal {
+    padding: 8px 11px;
+    font-size: 10.5px;
   }
 }

@@ -38,8 +38,9 @@ export interface PresentationScene {
   /** Arbeitspaket tag (PM course WBS), e.g. "AP 4 · Sicherheit & Zutritt". */
   workPackage?: string
   /** 'clean' hides the whole HUD + device markers — pure house visual (intro scene).
-   *  'pitch' hides the full HUD and shows the Vorteile tiles (finale scene). */
-  hud?: 'full' | 'clean' | 'pitch'
+   *  'pitch' hides the full HUD and shows the Vorteile tiles (finale scene).
+   *  'savings' shows the savings-mechanics breakdown (how the numbers arise). */
+  hud?: 'full' | 'clean' | 'pitch' | 'savings'
 }
 
 /** Visual body of a device marker — picks a procedural mini-model. */
