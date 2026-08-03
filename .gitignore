@@ -5,3 +5,7 @@ dist/
 .edge-profile/
 vite-*.log
 qa-*.png
+.idea/
+.claude/
+AGENTS.md
+START_3D_LOKAL.bat
