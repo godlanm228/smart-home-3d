@@ -9,3 +9,8 @@ qa-*.png
 .claude/
 AGENTS.md
 START_3D_LOKAL.bat
+
+# Internal working docs — local only
+HANDOFF.md
+SMART_HOME_3D_AGENT_PLAN.md
+AGENTS.md
